@@ -247,6 +247,41 @@ const SolicitacoesDoFuncionario = () => {
                 </>
               )}
 
+              {(novaSolicitacao.tipo === "ferias" || novaSolicitacao.tipo === "documento") && (
+                <>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Data de Início</label>
+                    <Input
+                      type="date"
+                      value={novaSolicitacao.dataInicio}
+                      onChange={(e) =>
+                        setNovaSolicitacao({
+                          ...novaSolicitacao,
+                          dataInicio: e.target.value,
+                        })
+                      }
+                      required
+                    />
+                  </div>
+                  {novaSolicitacao.tipo === "ferias" && (
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Data de Fim</label>
+                      <Input
+                        type="date"
+                        value={novaSolicitacao.dataFim}
+                        onChange={(e) =>
+                          setNovaSolicitacao({
+                            ...novaSolicitacao,
+                            dataFim: e.target.value,
+                          })
+                        }
+                        required
+                      />
+                    </div>
+                  )}
+                </>
+              )}
+
               <div className="space-y-2">
                 <label className="text-sm font-medium">Observações</label>
                 <textarea
@@ -303,7 +338,8 @@ const SolicitacoesDoFuncionario = () => {
                     {solicitacao.tipo}
                   </CardTitle>
                   <p className="text-sm text-muted-foreground">
-                    {solicitacao.dataInicio} - {solicitacao.dataFim}
+                    {solicitacao.dataInicio} 
+                    {solicitacao.dataFim !== solicitacao.dataInicio && ` - ${solicitacao.dataFim}`}
                   </p>
                 </div>
               </div>
@@ -318,6 +354,9 @@ const SolicitacoesDoFuncionario = () => {
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
                 {solicitacao.observacoes}
+                {solicitacao.detalhes && (
+                  <span className="block mt-2 font-medium">{solicitacao.detalhes}</span>
+                )}
               </p>
               <div className="flex justify-end">
                 <Button variant="outline" size="sm">
