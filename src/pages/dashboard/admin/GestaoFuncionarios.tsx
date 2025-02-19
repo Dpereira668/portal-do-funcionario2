@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FileText, Plus, Upload } from "lucide-react";
 import { useState } from "react";
 import { AVAILABLE_POSITIONS } from "@/constants/positions";
@@ -42,6 +42,7 @@ interface Employee {
 const GestaoFuncionarios = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: positions, refetch: refetchPositions } = useQuery({
     queryKey: ["positions"],
@@ -71,7 +72,7 @@ const GestaoFuncionarios = () => {
     },
   });
 
-  const { data: registrationRequests } = useQuery({
+  const { data: registrationRequests, refetch: refetchRequests } = useQuery({
     queryKey: ["registration_requests"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -196,6 +197,85 @@ const GestaoFuncionarios = () => {
     }
   };
 
+  const handleApproveRequest = async (request: any) => {
+    try {
+      // Procura ou cria o cargo
+      let positionId = positions?.find(
+        p => p.title.toLowerCase() === request.position_title.toLowerCase()
+      )?.id;
+
+      if (!positionId) {
+        const { data: newPosition, error: positionError } = await supabase
+          .from("positions")
+          .insert({ title: request.position_title })
+          .select("id")
+          .single();
+
+        if (positionError) throw positionError;
+        positionId = newPosition.id;
+      }
+
+      // Cria o perfil do funcionário
+      const { error: profileError } = await supabase.from("profiles").insert({
+        name: request.name,
+        email: request.email,
+        cpf: request.cpf,
+        phone: request.phone,
+        position_id: positionId,
+        role: 'funcionario',
+        status: 'active'
+      });
+
+      if (profileError) throw profileError;
+
+      // Atualiza o status da solicitação para aprovado
+      const { error: requestError } = await supabase
+        .from("registration_requests")
+        .update({ status: 'approved' })
+        .eq('id', request.id);
+
+      if (requestError) throw requestError;
+
+      toast({
+        title: "Solicitação aprovada",
+        description: "O funcionário foi cadastrado com sucesso!",
+      });
+
+      refetchRequests();
+      refetchEmployees();
+    } catch (error: any) {
+      toast({
+        title: "Erro ao aprovar solicitação",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleRejectRequest = async (requestId: string) => {
+    try {
+      const { error } = await supabase
+        .from("registration_requests")
+        .update({ status: 'rejected' })
+        .eq('id', requestId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Solicitação rejeitada",
+        description: "A solicitação foi rejeitada com sucesso.",
+      });
+
+      refetchRequests();
+    } catch (error: any) {
+      toast({
+        title: "Erro ao rejeitar solicitação",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <ScrollArea className="h-screen">
       <div className="p-8 space-y-6">
@@ -311,18 +391,14 @@ const GestaoFuncionarios = () => {
                       <div className="flex gap-2 mt-4">
                         <Button
                           size="sm"
-                          onClick={() => {
-                            // Implementar aprovação
-                          }}
+                          onClick={() => handleApproveRequest(request)}
                         >
                           Aprovar
                         </Button>
                         <Button
                           size="sm"
                           variant="destructive"
-                          onClick={() => {
-                            // Implementar rejeição
-                          }}
+                          onClick={() => handleRejectRequest(request.id)}
                         >
                           Rejeitar
                         </Button>
