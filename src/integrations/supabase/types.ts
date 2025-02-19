@@ -9,6 +9,39 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      admin_profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          function: string | null
+          id: string
+          name: string | null
+          notes: string | null
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          function?: string | null
+          id: string
+          name?: string | null
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          function?: string | null
+          id?: string
+          name?: string | null
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       positions: {
         Row: {
           created_at: string
@@ -132,6 +165,45 @@ export type Database = {
           uniform_type?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      vacation_schedules: {
+        Row: {
+          created_at: string
+          employee_cpf: string
+          employee_name: string
+          end_date: string
+          id: string
+          observation: string | null
+          position_title: string
+          start_date: string
+          updated_at: string
+          workplace: string
+        }
+        Insert: {
+          created_at?: string
+          employee_cpf: string
+          employee_name: string
+          end_date: string
+          id?: string
+          observation?: string | null
+          position_title: string
+          start_date: string
+          updated_at?: string
+          workplace: string
+        }
+        Update: {
+          created_at?: string
+          employee_cpf?: string
+          employee_name?: string
+          end_date?: string
+          id?: string
+          observation?: string | null
+          position_title?: string
+          start_date?: string
+          updated_at?: string
+          workplace?: string
         }
         Relationships: []
       }
