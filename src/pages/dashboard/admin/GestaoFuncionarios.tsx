@@ -28,8 +28,14 @@ interface Employee {
   id: string;
   cpf: string;
   name: string;
+  email: string;
+  phone: string;
   position_id: string;
   workplace: string;
+  address: string;
+  birth_date: string;
+  admission_date: string;
+  status: string;
   position_title?: string;
 }
 
@@ -65,6 +71,19 @@ const GestaoFuncionarios = () => {
     },
   });
 
+  const { data: registrationRequests } = useQuery({
+    queryKey: ["registration_requests"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("registration_requests")
+        .select("*")
+        .eq("status", "pending");
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -93,7 +112,8 @@ const GestaoFuncionarios = () => {
           cpf,
           position_id: positionId,
           workplace,
-          role: 'funcionario'
+          role: 'funcionario',
+          status: 'active'
         });
 
         if (error) {
@@ -137,10 +157,7 @@ const GestaoFuncionarios = () => {
           .select("id")
           .single();
 
-        if (positionError) {
-          console.error('Erro ao criar cargo:', positionError);
-          throw positionError;
-        }
+        if (positionError) throw positionError;
 
         positionId = newPosition.id;
         await refetchPositions();
@@ -149,16 +166,19 @@ const GestaoFuncionarios = () => {
       // Cria o perfil do funcionário
       const { error: profileError } = await supabase.from("profiles").insert({
         name: formData.get("name") as string,
+        email: formData.get("email") as string,
         cpf: formData.get("cpf") as string,
+        phone: formData.get("phone") as string,
         position_id: positionId,
         workplace: formData.get("workplace") as string,
-        role: 'funcionario'
+        address: formData.get("address") as string,
+        birth_date: formData.get("birth_date") as string,
+        admission_date: formData.get("admission_date") as string,
+        role: 'funcionario',
+        status: 'active'
       });
 
-      if (profileError) {
-        console.error('Erro ao criar perfil:', profileError);
-        throw profileError;
-      }
+      if (profileError) throw profileError;
 
       toast({
         title: "Funcionário adicionado",
@@ -168,7 +188,6 @@ const GestaoFuncionarios = () => {
       setIsAddDialogOpen(false);
       refetchEmployees();
     } catch (error: any) {
-      console.error('Erro completo:', error);
       toast({
         title: "Erro ao adicionar funcionário",
         description: error.message,
@@ -220,8 +239,28 @@ const GestaoFuncionarios = () => {
                       <Input name="name" required />
                     </div>
                     <div className="space-y-2">
+                      <label className="text-sm font-medium">Email</label>
+                      <Input name="email" type="email" required />
+                    </div>
+                    <div className="space-y-2">
                       <label className="text-sm font-medium">CPF</label>
                       <Input name="cpf" required pattern="\d{11}" maxLength={11} />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Telefone</label>
+                      <Input name="phone" required />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Endereço</label>
+                      <Input name="address" required />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Data de Nascimento</label>
+                      <Input name="birth_date" type="date" required />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Data de Admissão</label>
+                      <Input name="admission_date" type="date" required />
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Cargo</label>
@@ -248,6 +287,54 @@ const GestaoFuncionarios = () => {
           </div>
         </div>
 
+        {registrationRequests && registrationRequests.length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-xl font-semibold mb-4">Solicitações de Cadastro Pendentes</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {registrationRequests.map((request) => (
+                <Card key={request.id}>
+                  <CardHeader>
+                    <CardTitle>{request.name}</CardTitle>
+                    <CardDescription>CPF: {request.cpf}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <p className="text-sm">
+                        <strong>Email:</strong> {request.email}
+                      </p>
+                      <p className="text-sm">
+                        <strong>Telefone:</strong> {request.phone}
+                      </p>
+                      <p className="text-sm">
+                        <strong>Cargo Desejado:</strong> {request.position_title}
+                      </p>
+                      <div className="flex gap-2 mt-4">
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            // Implementar aprovação
+                          }}
+                        >
+                          Aprovar
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => {
+                            // Implementar rejeição
+                          }}
+                        >
+                          Rejeitar
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {employees?.map((employee) => (
             <Card key={employee.id}>
@@ -258,11 +345,23 @@ const GestaoFuncionarios = () => {
               <CardContent>
                 <div className="space-y-2">
                   <p className="text-sm">
+                    <strong>Email:</strong> {employee.email}
+                  </p>
+                  <p className="text-sm">
+                    <strong>Telefone:</strong> {employee.phone}
+                  </p>
+                  <p className="text-sm">
                     <strong>Cargo:</strong> {employee.position_title}
                   </p>
                   <p className="text-sm">
                     <strong>Local:</strong> {employee.workplace}
                   </p>
+                  <div className="flex justify-end mt-4">
+                    <Button variant="outline" size="sm">
+                      <FileText className="h-4 w-4 mr-2" />
+                      Ver Detalhes
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
