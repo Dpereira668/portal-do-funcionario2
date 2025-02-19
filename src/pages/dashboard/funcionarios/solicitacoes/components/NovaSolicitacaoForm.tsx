@@ -6,31 +6,17 @@ import { useSolicitacaoForm } from "../hooks/useSolicitacaoForm";
 
 interface NovaSolicitacaoFormProps {
   onSuccess: () => void;
+  tipoInicial?: string;
 }
 
-const NovaSolicitacaoForm = ({ onSuccess }: NovaSolicitacaoFormProps) => {
+const NovaSolicitacaoForm = ({ onSuccess, tipoInicial }: NovaSolicitacaoFormProps) => {
   const { novaSolicitacao, loading, handleChange, handleSubmit } = useSolicitacaoForm({
     onSuccess,
+    tipoInicial,
   });
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Tipo de Solicitação</label>
-        <select
-          className="w-full p-2 border rounded-md"
-          value={novaSolicitacao.tipo}
-          onChange={(e) => handleChange("tipo", e.target.value)}
-          required
-        >
-          <option value="">Selecione o tipo</option>
-          <option value="uniforme">Uniforme</option>
-          <option value="ferias">Férias</option>
-          <option value="documento">Documento</option>
-          <option value="outros">Outros</option>
-        </select>
-      </div>
-
       {novaSolicitacao.tipo === "uniforme" && (
         <UniformeForm
           tipoUniforme={novaSolicitacao.tipoUniforme}

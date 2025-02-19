@@ -9,7 +9,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Calendar, FileText, List, Plus, Shirt } from "lucide-react";
+import { Calendar, FileText, Shirt } from "lucide-react";
 import { useState } from "react";
 import NovaSolicitacaoForm from "./components/NovaSolicitacaoForm";
 import SolicitacaoCard from "./components/SolicitacaoCard";
@@ -22,6 +22,7 @@ const SolicitacoesDoFuncionario = () => {
   const [filtroStatus, setFiltroStatus] = useState("todos");
   const [ordenacao, setOrdenacao] = useState("data");
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [tipoSolicitacao, setTipoSolicitacao] = useState("");
   const { user } = useAuth();
 
   const { data: solicitacoes = [], isLoading } = useQuery({
@@ -50,7 +51,7 @@ const SolicitacoesDoFuncionario = () => {
       case 'documento':
         return FileText;
       default:
-        return List;
+        return FileText;
     }
   };
 
@@ -78,6 +79,11 @@ const SolicitacoesDoFuncionario = () => {
     }
   };
 
+  const handleOpenSheet = (tipo: string) => {
+    setTipoSolicitacao(tipo);
+    setIsSheetOpen(true);
+  };
+
   const solicitacoesFiltradas = solicitacoes
     .filter((sol: any) => filtroStatus === "todos" || sol.status === filtroStatus)
     .sort((a: any, b: any) => {
@@ -89,31 +95,55 @@ const SolicitacoesDoFuncionario = () => {
 
   return (
     <div className="p-8 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-3xl font-bold text-primary">Minhas Solicitações</h2>
-          <p className="text-muted-foreground">
-            Gerencie suas solicitações e acompanhe o status
-          </p>
-        </div>
+      <div>
+        <h2 className="text-3xl font-bold text-primary">Minhas Solicitações</h2>
+        <p className="text-muted-foreground mb-6">
+          Gerencie suas solicitações e acompanhe o status
+        </p>
 
-        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-          <SheetTrigger asChild>
-            <Button className="bg-primary hover:bg-primary/90">
-              <Plus className="mr-2 h-4 w-4" />
-              Nova Solicitação
-            </Button>
-          </SheetTrigger>
-          <SheetContent className="sm:max-w-[425px]">
-            <SheetHeader>
-              <SheetTitle>Nova Solicitação</SheetTitle>
-              <SheetDescription>
-                Preencha os dados para criar uma nova solicitação
-              </SheetDescription>
-            </SheetHeader>
-            <NovaSolicitacaoForm onSuccess={() => setIsSheetOpen(false)} />
-          </SheetContent>
-        </Sheet>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+            <SheetTrigger asChild>
+              <Button 
+                onClick={() => handleOpenSheet('uniforme')}
+                className="w-full bg-[#8B5CF6] hover:bg-[#7C3AED] transition-colors"
+              >
+                <Shirt className="mr-2 h-5 w-5" />
+                Solicitar Uniforme
+              </Button>
+            </SheetTrigger>
+            <SheetTrigger asChild>
+              <Button 
+                onClick={() => handleOpenSheet('ferias')}
+                className="w-full bg-[#F97316] hover:bg-[#EA580C] transition-colors"
+              >
+                <Calendar className="mr-2 h-5 w-5" />
+                Solicitar Férias
+              </Button>
+            </SheetTrigger>
+            <SheetTrigger asChild>
+              <Button 
+                onClick={() => handleOpenSheet('documento')}
+                className="w-full bg-[#0EA5E9] hover:bg-[#0284C7] transition-colors"
+              >
+                <FileText className="mr-2 h-5 w-5" />
+                Solicitar Documento
+              </Button>
+            </SheetTrigger>
+            <SheetContent className="sm:max-w-[425px]">
+              <SheetHeader>
+                <SheetTitle>Nova Solicitação</SheetTitle>
+                <SheetDescription>
+                  Preencha os dados para criar uma nova solicitação
+                </SheetDescription>
+              </SheetHeader>
+              <NovaSolicitacaoForm 
+                tipoInicial={tipoSolicitacao}
+                onSuccess={() => setIsSheetOpen(false)} 
+              />
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
 
       <SolicitacoesFiltros
