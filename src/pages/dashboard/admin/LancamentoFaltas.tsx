@@ -205,12 +205,12 @@ const LancamentoFaltas = () => {
                     Lançar Falta
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+                <DialogContent className="max-w-2xl h-[90vh]">
                   <DialogHeader>
                     <DialogTitle>Lançar Falta</DialogTitle>
                   </DialogHeader>
-                  <ScrollArea className="flex-1">
-                    <form onSubmit={handleAddAbsence} className="space-y-4 p-4">
+                  <ScrollArea className="h-full pr-4">
+                    <form onSubmit={handleAddAbsence} className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <label className="text-sm font-medium">Nome do Funcionário</label>
@@ -288,7 +288,7 @@ const LancamentoFaltas = () => {
                         </div>
                       )}
 
-                      <Button type="submit" className="w-full">
+                      <Button type="submit" className="w-full mt-6">
                         Registrar Falta
                       </Button>
                     </form>
@@ -384,8 +384,6 @@ const LancamentoFaltas = () => {
           </div>
         </div>
       </ScrollArea>
-
-      
     </div>
   );
 };
