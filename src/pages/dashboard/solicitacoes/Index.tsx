@@ -66,17 +66,18 @@ const SolicitacoesIndex = () => {
     if (!solicitacao) return;
 
     const message = action === 'aprovar' 
-      ? "Solicitação aprovada com sucesso!"
-      : "Solicitação rejeitada com sucesso!";
+      ? `Solicitação de ${solicitacao.tipo.toLowerCase()} aprovada para ${solicitacao.funcionario}`
+      : `Solicitação de ${solicitacao.tipo.toLowerCase()} rejeitada para ${solicitacao.funcionario}`;
 
     toast({
       title: `${action === 'aprovar' ? 'Aprovação' : 'Rejeição'} de solicitação`,
       description: message,
+      variant: action === 'aprovar' ? 'default' : 'destructive',
     });
   };
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-8 space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-bold text-primary">Solicitações</h2>
