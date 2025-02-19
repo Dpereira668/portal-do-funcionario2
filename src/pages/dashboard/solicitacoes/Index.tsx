@@ -87,12 +87,15 @@ const SolicitacoesIndex = () => {
         </div>
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
         {solicitacoes.map((solicitacao) => (
-          <Card key={solicitacao.id} className="hover:shadow-lg transition-shadow">
+          <Card 
+            key={solicitacao.id} 
+            className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group"
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <div className="flex items-center space-x-4">
-                <div className="p-2 bg-primary/5 rounded-full">
+                <div className="p-2 bg-primary/5 rounded-full group-hover:bg-primary/10 transition-colors">
                   <solicitacao.icon className="h-5 w-5 text-primary" />
                 </div>
                 <div>
@@ -105,7 +108,7 @@ const SolicitacoesIndex = () => {
                 </div>
               </div>
               <span
-                className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
+                className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${getStatusColor(
                   solicitacao.status
                 )}`}
               >
@@ -121,14 +124,14 @@ const SolicitacoesIndex = () => {
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="text-red-600"
+                    className="text-red-600 hover:bg-red-50 transition-colors"
                     onClick={() => handleAction(solicitacao.id, 'rejeitar')}
                   >
                     Rejeitar
                   </Button>
                   <Button 
                     size="sm" 
-                    className="bg-green-600 hover:bg-green-700"
+                    className="bg-green-600 hover:bg-green-700 transition-colors"
                     onClick={() => handleAction(solicitacao.id, 'aprovar')}
                   >
                     Aprovar
