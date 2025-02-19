@@ -3,6 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface NovaSolicitacaoFormProps {
   onSuccess: () => void;
@@ -10,6 +13,9 @@ interface NovaSolicitacaoFormProps {
 
 const NovaSolicitacaoForm = ({ onSuccess }: NovaSolicitacaoFormProps) => {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const [loading, setLoading] = useState(false);
   const [novaSolicitacao, setNovaSolicitacao] = useState({
     tipo: "",
     dataInicio: "",
@@ -20,9 +26,18 @@ const NovaSolicitacaoForm = ({ onSuccess }: NovaSolicitacaoFormProps) => {
     quantidade: 1,
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!user) {
+      toast({
+        title: "Erro na solicitação",
+        description: "Usuário não autenticado.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!novaSolicitacao.tipo) {
       toast({
         title: "Erro na solicitação",
@@ -32,33 +47,47 @@ const NovaSolicitacaoForm = ({ onSuccess }: NovaSolicitacaoFormProps) => {
       return;
     }
 
-    if (novaSolicitacao.tipo === "uniforme") {
-      if (!novaSolicitacao.tamanhoUniforme || !novaSolicitacao.tipoUniforme) {
-        toast({
-          title: "Erro na solicitação",
-          description: "Por favor, preencha todos os campos do uniforme.",
-          variant: "destructive",
-        });
-        return;
-      }
+    setLoading(true);
+    try {
+      const { error } = await supabase.from('requests').insert({
+        user_id: user.id,
+        type: novaSolicitacao.tipo,
+        start_date: novaSolicitacao.dataInicio,
+        end_date: novaSolicitacao.dataFim || null,
+        notes: novaSolicitacao.observacoes,
+        uniform_type: novaSolicitacao.tipo === 'uniforme' ? novaSolicitacao.tipoUniforme : null,
+        uniform_size: novaSolicitacao.tipo === 'uniforme' ? novaSolicitacao.tamanhoUniforme : null,
+        uniform_quantity: novaSolicitacao.tipo === 'uniforme' ? novaSolicitacao.quantidade : null,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Solicitação enviada",
+        description: "Sua solicitação foi enviada com sucesso!",
+      });
+
+      setNovaSolicitacao({
+        tipo: "",
+        dataInicio: "",
+        dataFim: "",
+        observacoes: "",
+        tamanhoUniforme: "",
+        tipoUniforme: "",
+        quantidade: 1,
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ['requests'] });
+      onSuccess();
+    } catch (error: any) {
+      toast({
+        title: "Erro ao enviar solicitação",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
-
-    toast({
-      title: "Solicitação enviada",
-      description: "Sua solicitação foi enviada com sucesso!",
-    });
-
-    setNovaSolicitacao({
-      tipo: "",
-      dataInicio: "",
-      dataFim: "",
-      observacoes: "",
-      tamanhoUniforme: "",
-      tipoUniforme: "",
-      quantidade: 1,
-    });
-    
-    onSuccess();
   };
 
   return (
@@ -199,8 +228,12 @@ const NovaSolicitacaoForm = ({ onSuccess }: NovaSolicitacaoFormProps) => {
           placeholder="Adicione observações importantes sobre sua solicitação..."
         />
       </div>
-      <Button type="submit" className="w-full">
-        Enviar Solicitação
+      <Button type="submit" className="w-full" disabled={loading}>
+        {loading ? (
+          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
+        ) : (
+          "Enviar Solicitação"
+        )}
       </Button>
     </form>
   );
