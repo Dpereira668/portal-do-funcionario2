@@ -1,11 +1,4 @@
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -14,25 +7,14 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-  SheetClose,
 } from "@/components/ui/sheet";
-import { Input } from "@/components/ui/input";
 import { Calendar, FileText, List, Plus, Shirt } from "lucide-react";
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import NovaSolicitacaoForm from "./components/NovaSolicitacaoForm";
+import SolicitacaoCard from "./components/SolicitacaoCard";
+import SolicitacoesFiltros from "./components/SolicitacoesFiltros";
 
 const SolicitacoesDoFuncionario = () => {
-  const { toast } = useToast();
-  const [novaSolicitacao, setNovaSolicitacao] = useState({
-    tipo: "",
-    dataInicio: "",
-    dataFim: "",
-    observacoes: "",
-    tamanhoUniforme: "",
-    tipoUniforme: "",
-    quantidade: 1,
-  });
-
   const [filtroStatus, setFiltroStatus] = useState("todos");
   const [ordenacao, setOrdenacao] = useState("data");
 
@@ -87,45 +69,6 @@ const SolicitacoesDoFuncionario = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!novaSolicitacao.tipo) {
-      toast({
-        title: "Erro na solicitação",
-        description: "Por favor, selecione o tipo de solicitação.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (novaSolicitacao.tipo === "uniforme") {
-      if (!novaSolicitacao.tamanhoUniforme || !novaSolicitacao.tipoUniforme) {
-        toast({
-          title: "Erro na solicitação",
-          description: "Por favor, preencha todos os campos do uniforme.",
-          variant: "destructive",
-        });
-        return;
-      }
-    }
-
-    toast({
-      title: "Solicitação enviada",
-      description: "Sua solicitação foi enviada com sucesso!",
-    });
-
-    setNovaSolicitacao({
-      tipo: "",
-      dataInicio: "",
-      dataFim: "",
-      observacoes: "",
-      tamanhoUniforme: "",
-      tipoUniforme: "",
-      quantidade: 1,
-    });
-  };
-
   const solicitacoesFiltradas = minhasSolicitacoes
     .filter((sol) => filtroStatus === "todos" || sol.status === filtroStatus)
     .sort((a, b) => {
@@ -159,212 +102,25 @@ const SolicitacoesDoFuncionario = () => {
                 Preencha os dados para criar uma nova solicitação
               </SheetDescription>
             </SheetHeader>
-            <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Tipo de Solicitação</label>
-                <select
-                  className="w-full p-2 border rounded-md"
-                  value={novaSolicitacao.tipo}
-                  onChange={(e) =>
-                    setNovaSolicitacao({
-                      ...novaSolicitacao,
-                      tipo: e.target.value,
-                    })
-                  }
-                  required
-                >
-                  <option value="">Selecione o tipo</option>
-                  <option value="uniforme">Uniforme</option>
-                  <option value="ferias">Férias</option>
-                  <option value="documento">Documento</option>
-                  <option value="outros">Outros</option>
-                </select>
-              </div>
-
-              {novaSolicitacao.tipo === "uniforme" && (
-                <>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Tipo de Uniforme</label>
-                    <select
-                      className="w-full p-2 border rounded-md"
-                      value={novaSolicitacao.tipoUniforme}
-                      onChange={(e) =>
-                        setNovaSolicitacao({
-                          ...novaSolicitacao,
-                          tipoUniforme: e.target.value,
-                        })
-                      }
-                      required
-                    >
-                      <option value="">Selecione o tipo</option>
-                      <option value="camisa-social">Camisa Social</option>
-                      <option value="camisa-polo">Camisa Polo</option>
-                      <option value="calca">Calça</option>
-                      <option value="blazer">Blazer</option>
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Tamanho</label>
-                    <select
-                      className="w-full p-2 border rounded-md"
-                      value={novaSolicitacao.tamanhoUniforme}
-                      onChange={(e) =>
-                        setNovaSolicitacao({
-                          ...novaSolicitacao,
-                          tamanhoUniforme: e.target.value,
-                        })
-                      }
-                      required
-                    >
-                      <option value="">Selecione o tamanho</option>
-                      <option value="PP">PP</option>
-                      <option value="P">P</option>
-                      <option value="M">M</option>
-                      <option value="G">G</option>
-                      <option value="GG">GG</option>
-                      <option value="XG">XG</option>
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Quantidade</label>
-                    <Input
-                      type="number"
-                      min="1"
-                      max="5"
-                      value={novaSolicitacao.quantidade}
-                      onChange={(e) =>
-                        setNovaSolicitacao({
-                          ...novaSolicitacao,
-                          quantidade: parseInt(e.target.value),
-                        })
-                      }
-                      required
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Máximo de 5 unidades por solicitação
-                    </p>
-                  </div>
-                </>
-              )}
-
-              {(novaSolicitacao.tipo === "ferias" || novaSolicitacao.tipo === "documento") && (
-                <>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Data de Início</label>
-                    <Input
-                      type="date"
-                      value={novaSolicitacao.dataInicio}
-                      onChange={(e) =>
-                        setNovaSolicitacao({
-                          ...novaSolicitacao,
-                          dataInicio: e.target.value,
-                        })
-                      }
-                      required
-                    />
-                  </div>
-                  {novaSolicitacao.tipo === "ferias" && (
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Data de Fim</label>
-                      <Input
-                        type="date"
-                        value={novaSolicitacao.dataFim}
-                        onChange={(e) =>
-                          setNovaSolicitacao({
-                            ...novaSolicitacao,
-                            dataFim: e.target.value,
-                          })
-                        }
-                        required
-                      />
-                    </div>
-                  )}
-                </>
-              )}
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Observações</label>
-                <textarea
-                  className="w-full p-2 border rounded-md min-h-[100px]"
-                  value={novaSolicitacao.observacoes}
-                  onChange={(e) =>
-                    setNovaSolicitacao({
-                      ...novaSolicitacao,
-                      observacoes: e.target.value,
-                    })
-                  }
-                  placeholder="Adicione observações importantes sobre sua solicitação..."
-                />
-              </div>
-              <Button type="submit" className="w-full">
-                Enviar Solicitação
-              </Button>
-            </form>
+            <NovaSolicitacaoForm onSuccess={() => {}} />
           </SheetContent>
         </Sheet>
       </div>
 
-      <div className="flex gap-4">
-        <select
-          className="p-2 border rounded-md"
-          value={filtroStatus}
-          onChange={(e) => setFiltroStatus(e.target.value)}
-        >
-          <option value="todos">Todos os Status</option>
-          <option value="Pendente">Pendente</option>
-          <option value="Aprovado">Aprovado</option>
-          <option value="Rejeitado">Rejeitado</option>
-        </select>
-        <select
-          className="p-2 border rounded-md"
-          value={ordenacao}
-          onChange={(e) => setOrdenacao(e.target.value)}
-        >
-          <option value="data">Ordenar por Data</option>
-          <option value="status">Ordenar por Status</option>
-        </select>
-      </div>
+      <SolicitacoesFiltros
+        filtroStatus={filtroStatus}
+        setFiltroStatus={setFiltroStatus}
+        ordenacao={ordenacao}
+        setOrdenacao={setOrdenacao}
+      />
 
       <div className="grid gap-4">
         {solicitacoesFiltradas.map((solicitacao) => (
-          <Card key={solicitacao.id} className="hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <div className="flex items-center space-x-4">
-                <div className="p-2 bg-primary/5 rounded-full">
-                  <solicitacao.icon className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg font-medium">
-                    {solicitacao.tipo}
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    {solicitacao.dataInicio} 
-                    {solicitacao.dataFim !== solicitacao.dataInicio && ` - ${solicitacao.dataFim}`}
-                  </p>
-                </div>
-              </div>
-              <span
-                className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
-                  solicitacao.status
-                )}`}
-              >
-                {solicitacao.status}
-              </span>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                {solicitacao.observacoes}
-                {solicitacao.detalhes && (
-                  <span className="block mt-2 font-medium">{solicitacao.detalhes}</span>
-                )}
-              </p>
-              <div className="flex justify-end">
-                <Button variant="outline" size="sm">
-                  Ver Detalhes
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <SolicitacaoCard
+            key={solicitacao.id}
+            {...solicitacao}
+            getStatusColor={getStatusColor}
+          />
         ))}
       </div>
     </div>
