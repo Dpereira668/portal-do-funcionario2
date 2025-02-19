@@ -9,32 +9,80 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      profiles: {
+      positions: {
         Row: {
           created_at: string
-          department: string | null
+          description: string | null
           id: string
-          name: string | null
-          role: string | null
+          title: string
           updated_at: string
         }
         Insert: {
           created_at?: string
-          department?: string | null
-          id: string
-          name?: string | null
-          role?: string | null
+          description?: string | null
+          id?: string
+          title: string
           updated_at?: string
         }
         Update: {
           created_at?: string
-          department?: string | null
+          description?: string | null
           id?: string
-          name?: string | null
-          role?: string | null
+          title?: string
           updated_at?: string
         }
         Relationships: []
+      }
+      profiles: {
+        Row: {
+          cpf: string | null
+          created_at: string
+          department: string | null
+          id: string
+          name: string | null
+          position_id: string | null
+          role: string | null
+          updated_at: string
+          workplace_id: string | null
+        }
+        Insert: {
+          cpf?: string | null
+          created_at?: string
+          department?: string | null
+          id: string
+          name?: string | null
+          position_id?: string | null
+          role?: string | null
+          updated_at?: string
+          workplace_id?: string | null
+        }
+        Update: {
+          cpf?: string | null
+          created_at?: string
+          department?: string | null
+          id?: string
+          name?: string | null
+          position_id?: string | null
+          role?: string | null
+          updated_at?: string
+          workplace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_workplace_id_fkey"
+            columns: ["workplace_id"]
+            isOneToOne: false
+            referencedRelation: "workplaces"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       requests: {
         Row: {
@@ -84,6 +132,30 @@ export type Database = {
           uniform_type?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      workplaces: {
+        Row: {
+          address: string | null
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
         }
         Relationships: []
       }

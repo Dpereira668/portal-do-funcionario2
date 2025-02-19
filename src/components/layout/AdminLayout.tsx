@@ -24,9 +24,9 @@ const AdminLayout = () => {
       path: "/admin/solicitacoes",
     },
     {
-      title: "Funcionários",
+      title: "Gestão de Funcionários",
       icon: Users,
-      path: "/admin/funcionarios",
+      path: "/admin/gestao-funcionarios",
     },
   ];
 

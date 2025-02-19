@@ -11,29 +11,76 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 
 const Cadastro = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [cpf, setCpf] = useState("");
   const [loading, setLoading] = useState(false);
   const { signUp } = useAuth();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password || !confirmPassword) {
+    if (!email || !password || !confirmPassword || !cpf) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Por favor, preencha todos os campos",
+        variant: "destructive",
+      });
       return;
     }
 
     if (password !== confirmPassword) {
+      toast({
+        title: "Senhas diferentes",
+        description: "As senhas não coincidem",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Verifica se existe um perfil com o CPF informado
+    const { data: profiles, error: profileError } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("cpf", cpf)
+      .single();
+
+    if (profileError && profileError.code !== "PGRST116") {
+      toast({
+        title: "Erro na verificação",
+        description: "Erro ao verificar o CPF",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!profiles) {
+      toast({
+        title: "CPF não encontrado",
+        description: "Este CPF não está cadastrado no sistema",
+        variant: "destructive",
+      });
       return;
     }
 
     setLoading(true);
     try {
       await signUp(email, password);
-    } catch (error) {
-      console.error("Signup error:", error);
+      toast({
+        title: "Cadastro realizado",
+        description: "Sua conta foi criada com sucesso!",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro no cadastro",
+        description: error.message,
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -50,6 +97,20 @@ const Cadastro = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium" htmlFor="cpf">
+                CPF
+              </label>
+              <Input
+                id="cpf"
+                value={cpf}
+                onChange={(e) => setCpf(e.target.value.replace(/\D/g, ""))}
+                maxLength={11}
+                pattern="\d{11}"
+                required
+                placeholder="Digite apenas números"
+              />
+            </div>
             <div className="space-y-2">
               <label className="text-sm font-medium" htmlFor="email">
                 Email
@@ -100,6 +161,7 @@ const Cadastro = () => {
                 !email ||
                 !password ||
                 !confirmPassword ||
+                !cpf ||
                 password !== confirmPassword
               }
             >

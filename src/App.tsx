@@ -8,7 +8,7 @@ import AdminLayout from "./components/layout/AdminLayout";
 import FuncionarioLayout from "./components/layout/FuncionarioLayout";
 import DashboardIndex from "./pages/dashboard/Index";
 import SolicitacoesIndex from "./pages/dashboard/solicitacoes/Index";
-import FuncionariosIndex from "./pages/dashboard/funcionarios/Index";
+import GestaoFuncionarios from "./pages/dashboard/admin/GestaoFuncionarios";
 import SolicitacoesDoFuncionario from "./pages/dashboard/funcionarios/solicitacoes/Index";
 import Login from "./pages/auth/Login";
 import Cadastro from "./pages/auth/Cadastro";
@@ -32,35 +32,15 @@ const App = () => (
           <Route element={<PrivateRoute />}>
             {/* Rotas de Admin */}
             <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={
-                <div className="animate-fade-in">
-                  <DashboardIndex />
-                </div>
-              } />
-              <Route path="solicitacoes" element={
-                <div className="animate-fade-in">
-                  <SolicitacoesIndex />
-                </div>
-              } />
-              <Route path="funcionarios" element={
-                <div className="animate-fade-in">
-                  <FuncionariosIndex />
-                </div>
-              } />
+              <Route index element={<DashboardIndex />} />
+              <Route path="solicitacoes" element={<SolicitacoesIndex />} />
+              <Route path="gestao-funcionarios" element={<GestaoFuncionarios />} />
             </Route>
 
             {/* Rotas de Funcionário */}
             <Route path="/funcionario" element={<FuncionarioLayout />}>
-              <Route index element={
-                <div className="animate-fade-in">
-                  <FuncionariosIndex />
-                </div>
-              } />
-              <Route path="solicitacoes" element={
-                <div className="animate-fade-in">
-                  <SolicitacoesDoFuncionario />
-                </div>
-              } />
+              <Route index element={<DashboardIndex />} />
+              <Route path="solicitacoes" element={<SolicitacoesDoFuncionario />} />
             </Route>
           </Route>
 
