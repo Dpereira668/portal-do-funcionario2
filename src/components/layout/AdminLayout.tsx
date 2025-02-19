@@ -11,6 +11,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Bell, Home, Users, Calendar, UserX } from "lucide-react";
 import { Outlet } from "react-router-dom";
 import SidebarMenuList, { MenuItem } from "../ui/SidebarMenuList";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 
 const AdminLayout = () => {
   const menuItems: MenuItem[] = [
@@ -42,25 +45,27 @@ const AdminLayout = () => {
   ];
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <Sidebar>
-          <ScrollArea className="h-full">
-            <SidebarContent>
-              <SidebarGroup>
-                <SidebarGroupLabel>Administração</SidebarGroupLabel>
-                <SidebarGroupContent>
-                  <SidebarMenuList items={menuItems} label="Menu de Administração" />
-                </SidebarGroupContent>
-              </SidebarGroup>
-            </SidebarContent>
-          </ScrollArea>
-        </Sidebar>
-        <main className="flex-1 overflow-hidden">
-          <Outlet />
-        </main>
-      </div>
-    </SidebarProvider>
+    <QueryClientProvider client={queryClient}>
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full">
+          <Sidebar>
+            <ScrollArea className="h-full">
+              <SidebarContent>
+                <SidebarGroup>
+                  <SidebarGroupLabel>Administração</SidebarGroupLabel>
+                  <SidebarGroupContent>
+                    <SidebarMenuList items={menuItems} label="Menu de Administração" />
+                  </SidebarGroupContent>
+                </SidebarGroup>
+              </SidebarContent>
+            </ScrollArea>
+          </Sidebar>
+          <main className="flex-1 overflow-hidden">
+            <Outlet />
+          </main>
+        </div>
+      </SidebarProvider>
+    </QueryClientProvider>
   );
 };
 
