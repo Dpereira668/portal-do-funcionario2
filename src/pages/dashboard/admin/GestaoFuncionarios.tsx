@@ -37,7 +37,7 @@ const GestaoFuncionarios = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  const { data: positions } = useQuery({
+  const { data: positions, refetch: refetchPositions } = useQuery({
     queryKey: ["positions"],
     queryFn: async () => {
       const { data, error } = await supabase.from("positions").select("*");
@@ -122,23 +122,29 @@ const GestaoFuncionarios = () => {
     const formData = new FormData(event.currentTarget);
     
     try {
-      // Primeiro, verifica se o cargo já existe ou cria um novo
-      let positionId;
       const positionTitle = formData.get("position") as string;
       
-      // Criando novo cargo
-      const { data: newPosition, error: positionError } = await supabase
-        .from("positions")
-        .insert({ title: positionTitle })
-        .select("id")
-        .single();
+      // Procura cargo existente primeiro
+      let positionId = positions?.find(
+        p => p.title.toLowerCase() === positionTitle.toLowerCase()
+      )?.id;
 
-      if (positionError) {
-        console.error('Erro ao criar cargo:', positionError);
-        throw positionError;
+      // Se não encontrar, cria novo cargo
+      if (!positionId) {
+        const { data: newPosition, error: positionError } = await supabase
+          .from("positions")
+          .insert({ title: positionTitle })
+          .select("id")
+          .single();
+
+        if (positionError) {
+          console.error('Erro ao criar cargo:', positionError);
+          throw positionError;
+        }
+
+        positionId = newPosition.id;
+        await refetchPositions();
       }
-
-      positionId = newPosition.id;
 
       // Cria o perfil do funcionário
       const { error: profileError } = await supabase.from("profiles").insert({
@@ -201,40 +207,42 @@ const GestaoFuncionarios = () => {
                 </Button>
               </DialogTrigger>
               <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Adicionar Funcionário</DialogTitle>
-                  <DialogDescription>
-                    Preencha os dados do novo funcionário
-                  </DialogDescription>
-                </DialogHeader>
-                <form onSubmit={handleAddEmployee} className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Nome</label>
-                    <Input name="name" required />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">CPF</label>
-                    <Input name="cpf" required pattern="\d{11}" maxLength={11} />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Cargo</label>
-                    <select name="position" className="w-full p-2 border rounded-md" required>
-                      <option value="">Selecione um cargo</option>
-                      {AVAILABLE_POSITIONS.map((position) => (
-                        <option key={position} value={position}>
-                          {position}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Local de Trabalho</label>
-                    <Input name="workplace" required />
-                  </div>
-                  <Button type="submit" className="w-full">
-                    Adicionar
-                  </Button>
-                </form>
+                <ScrollArea className="max-h-[80vh]">
+                  <DialogHeader>
+                    <DialogTitle>Adicionar Funcionário</DialogTitle>
+                    <DialogDescription>
+                      Preencha os dados do novo funcionário
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form onSubmit={handleAddEmployee} className="space-y-4 p-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Nome</label>
+                      <Input name="name" required />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">CPF</label>
+                      <Input name="cpf" required pattern="\d{11}" maxLength={11} />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Cargo</label>
+                      <select name="position" className="w-full p-2 border rounded-md" required>
+                        <option value="">Selecione um cargo</option>
+                        {AVAILABLE_POSITIONS.map((position) => (
+                          <option key={position} value={position}>
+                            {position}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Local de Trabalho</label>
+                      <Input name="workplace" required />
+                    </div>
+                    <Button type="submit" className="w-full">
+                      Adicionar
+                    </Button>
+                  </form>
+                </ScrollArea>
               </DialogContent>
             </Dialog>
           </div>
