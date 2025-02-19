@@ -88,13 +88,18 @@ const GestaoFuncionarios = () => {
         }
 
         // Cria o perfil do funcionário
-        await supabase.from("profiles").insert({
+        const { error } = await supabase.from("profiles").insert({
           name,
           cpf,
           position_id: positionId,
           workplace,
           role: 'funcionario'
         });
+
+        if (error) {
+          console.error('Erro ao criar perfil:', error);
+          throw error;
+        }
       }
 
       toast({
@@ -120,23 +125,23 @@ const GestaoFuncionarios = () => {
       // Primeiro, verifica se o cargo já existe ou cria um novo
       let positionId;
       const positionTitle = formData.get("position") as string;
-      const existingPosition = positions?.find(
-        p => p.title.toLowerCase() === positionTitle.toLowerCase()
-      );
+      
+      // Criando novo cargo
+      const { data: newPosition, error: positionError } = await supabase
+        .from("positions")
+        .insert({ title: positionTitle })
+        .select("id")
+        .single();
 
-      if (existingPosition) {
-        positionId = existingPosition.id;
-      } else {
-        const { data: newPosition } = await supabase
-          .from("positions")
-          .insert({ title: positionTitle })
-          .select("id")
-          .single();
-        positionId = newPosition?.id;
+      if (positionError) {
+        console.error('Erro ao criar cargo:', positionError);
+        throw positionError;
       }
 
+      positionId = newPosition.id;
+
       // Cria o perfil do funcionário
-      const { error } = await supabase.from("profiles").insert({
+      const { error: profileError } = await supabase.from("profiles").insert({
         name: formData.get("name") as string,
         cpf: formData.get("cpf") as string,
         position_id: positionId,
@@ -144,7 +149,10 @@ const GestaoFuncionarios = () => {
         role: 'funcionario'
       });
 
-      if (error) throw error;
+      if (profileError) {
+        console.error('Erro ao criar perfil:', profileError);
+        throw profileError;
+      }
 
       toast({
         title: "Funcionário adicionado",
@@ -154,6 +162,7 @@ const GestaoFuncionarios = () => {
       setIsAddDialogOpen(false);
       refetchEmployees();
     } catch (error: any) {
+      console.error('Erro completo:', error);
       toast({
         title: "Erro ao adicionar funcionário",
         description: error.message,
