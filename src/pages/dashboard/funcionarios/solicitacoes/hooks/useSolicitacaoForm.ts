@@ -7,21 +7,24 @@ import { useQueryClient } from "@tanstack/react-query";
 
 interface UseSolicitacaoFormProps {
   onSuccess: () => void;
+  tipoInicial?: string;
 }
 
-export const useSolicitacaoForm = ({ onSuccess }: UseSolicitacaoFormProps) => {
+export const useSolicitacaoForm = ({ onSuccess, tipoInicial }: UseSolicitacaoFormProps) => {
   const { toast } = useToast();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [novaSolicitacao, setNovaSolicitacao] = useState({
-    tipo: "",
+    tipo: tipoInicial || "",
     dataInicio: "",
     dataFim: "",
     observacoes: "",
     tamanhoUniforme: "",
     tipoUniforme: "",
     quantidade: 1,
+    advance_amount: 0,
+    advance_reason: "",
   });
 
   const handleChange = (field: string, value: string | number) => {
@@ -40,6 +43,8 @@ export const useSolicitacaoForm = ({ onSuccess }: UseSolicitacaoFormProps) => {
       tamanhoUniforme: "",
       tipoUniforme: "",
       quantidade: 1,
+      advance_amount: 0,
+      advance_reason: "",
     });
   };
 
@@ -75,6 +80,8 @@ export const useSolicitacaoForm = ({ onSuccess }: UseSolicitacaoFormProps) => {
         uniform_type: novaSolicitacao.tipo === 'uniforme' ? novaSolicitacao.tipoUniforme : null,
         uniform_size: novaSolicitacao.tipo === 'uniforme' ? novaSolicitacao.tamanhoUniforme : null,
         uniform_quantity: novaSolicitacao.tipo === 'uniforme' ? novaSolicitacao.quantidade : null,
+        advance_amount: novaSolicitacao.tipo === 'adiantamento' ? novaSolicitacao.advance_amount : null,
+        advance_reason: novaSolicitacao.tipo === 'adiantamento' ? novaSolicitacao.advance_reason : null,
       });
 
       if (error) throw error;
@@ -85,7 +92,7 @@ export const useSolicitacaoForm = ({ onSuccess }: UseSolicitacaoFormProps) => {
       });
 
       resetForm();
-      queryClient.invalidateQueries({ queryKey: ['requests'] });
+      queryClient.invalidateQueries({ queryKey: ['solicitacoes'] });
       onSuccess();
     } catch (error: any) {
       toast({

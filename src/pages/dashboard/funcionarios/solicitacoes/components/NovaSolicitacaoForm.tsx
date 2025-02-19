@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import UniformeForm from "./UniformeForm";
 import DatasForm from "./DatasForm";
+import AdiantamentoForm from "./AdiantamentoForm";
 import { useSolicitacaoForm } from "../hooks/useSolicitacaoForm";
 
 interface NovaSolicitacaoFormProps {
@@ -31,6 +32,14 @@ const NovaSolicitacaoForm = ({ onSuccess, tipoInicial }: NovaSolicitacaoFormProp
           tipo={novaSolicitacao.tipo}
           dataInicio={novaSolicitacao.dataInicio}
           dataFim={novaSolicitacao.dataFim}
+          onChange={handleChange}
+        />
+      )}
+
+      {novaSolicitacao.tipo === "adiantamento" && (
+        <AdiantamentoForm
+          valor={novaSolicitacao.advance_amount}
+          motivo={novaSolicitacao.advance_reason}
           onChange={handleChange}
         />
       )}

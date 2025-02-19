@@ -38,6 +38,8 @@ export type Database = {
       }
       requests: {
         Row: {
+          advance_amount: number | null
+          advance_reason: string | null
           created_at: string
           end_date: string | null
           id: string
@@ -52,6 +54,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          advance_amount?: number | null
+          advance_reason?: string | null
           created_at?: string
           end_date?: string | null
           id?: string
@@ -66,6 +70,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          advance_amount?: number | null
+          advance_reason?: string | null
           created_at?: string
           end_date?: string | null
           id?: string
