@@ -10,6 +10,9 @@ import DashboardIndex from "./pages/dashboard/Index";
 import SolicitacoesIndex from "./pages/dashboard/solicitacoes/Index";
 import FuncionariosIndex from "./pages/dashboard/funcionarios/Index";
 import SolicitacoesDoFuncionario from "./pages/dashboard/funcionarios/solicitacoes/Index";
+import Login from "./pages/auth/Login";
+import PrivateRoute from "./components/PrivateRoute";
+import { AuthProvider } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
 
@@ -17,26 +20,32 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <Toaster />
     <BrowserRouter>
-      <Routes>
-        {/* Página Inicial */}
-        <Route path="/" element={<Index />} />
-        
-        {/* Rotas de Admin */}
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<DashboardIndex />} />
-          <Route path="solicitacoes" element={<SolicitacoesIndex />} />
-          <Route path="funcionarios" element={<FuncionariosIndex />} />
-        </Route>
+      <AuthProvider>
+        <Routes>
+          {/* Rotas Públicas */}
+          <Route path="/" element={<Index />} />
+          <Route path="/login" element={<Login />} />
 
-        {/* Rotas de Funcionário */}
-        <Route path="/funcionario" element={<FuncionarioLayout />}>
-          <Route index element={<FuncionariosIndex />} />
-          <Route path="solicitacoes" element={<SolicitacoesDoFuncionario />} />
-        </Route>
+          {/* Rotas Protegidas */}
+          <Route element={<PrivateRoute />}>
+            {/* Rotas de Admin */}
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<DashboardIndex />} />
+              <Route path="solicitacoes" element={<SolicitacoesIndex />} />
+              <Route path="funcionarios" element={<FuncionariosIndex />} />
+            </Route>
 
-        {/* Página 404 */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+            {/* Rotas de Funcionário */}
+            <Route path="/funcionario" element={<FuncionarioLayout />}>
+              <Route index element={<FuncionariosIndex />} />
+              <Route path="solicitacoes" element={<SolicitacoesDoFuncionario />} />
+            </Route>
+          </Route>
+
+          {/* Página 404 */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   </QueryClientProvider>
 );
