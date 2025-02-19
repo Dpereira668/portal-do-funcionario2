@@ -6,15 +6,18 @@ const NotFound = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary to-secondary/20 p-4">
-      <div className="text-center space-y-4 animate-fadeIn">
-        <h1 className="text-4xl font-bold text-primary">404</h1>
-        <p className="text-xl text-gray-600 mb-4">Página não encontrada</p>
-        <Button
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5 flex items-center justify-center">
+      <div className="max-w-2xl mx-auto p-8 text-center space-y-6">
+        <h1 className="text-4xl font-bold text-primary">Página não encontrada</h1>
+        <p className="text-xl text-muted-foreground">
+          A página que você está procurando não existe ou foi movida.
+        </p>
+        <Button 
+          size="lg"
           onClick={() => navigate("/")}
           className="bg-primary hover:bg-primary/90"
         >
-          Voltar ao Início
+          Voltar para o início
         </Button>
       </div>
     </div>

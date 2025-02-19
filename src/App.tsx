@@ -18,6 +18,7 @@ const App = () => (
     <Toaster />
     <BrowserRouter>
       <Routes>
+        {/* Página Inicial */}
         <Route path="/" element={<Index />} />
         
         {/* Rotas de Admin */}
@@ -33,6 +34,7 @@ const App = () => (
           <Route path="solicitacoes" element={<SolicitacoesDoFuncionario />} />
         </Route>
 
+        {/* Página 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
