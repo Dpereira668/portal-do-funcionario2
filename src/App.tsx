@@ -29,7 +29,7 @@ const App = () => (
 
         {/* Rotas de Funcionário */}
         <Route path="/funcionario" element={<FuncionarioLayout />}>
-          <Route index element={<SolicitacoesDoFuncionario />} />
+          <Route index element={<FuncionariosIndex />} />
           <Route path="solicitacoes" element={<SolicitacoesDoFuncionario />} />
         </Route>
 
