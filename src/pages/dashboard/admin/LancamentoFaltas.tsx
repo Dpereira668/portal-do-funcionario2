@@ -16,6 +16,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { AbsenceCard } from "./components/AbsenceCard";
 import { AbsenceForm } from "./components/AbsenceForm";
 import { type Absence } from "./types/absences";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 const LancamentoFaltas = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -83,19 +85,111 @@ const LancamentoFaltas = () => {
 
       if (error) throw error;
 
+      const headers = [
+        "Data da Falta",
+        "Nome do Funcionário",
+        "CPF do Funcionário",
+        "Função",
+        "Posto",
+        "Nome do Prestador",
+        "CPF do Prestador",
+        "Valor",
+        "Banco",
+        "Agência",
+        "Conta",
+        "Tipo de Conta",
+        "PIX",
+        "Status",
+      ];
+
       const csv = [
-        "Nome,CPF,Valor,Banco,Agência,Conta,Tipo de Conta,PIX",
+        headers.join(","),
         ...data.map(absence => {
           const bankInfo = absence.coverage_bank_info;
-          return `${absence.coverage_name},${absence.coverage_cpf},${absence.coverage_value},${bankInfo?.bank || ''},${bankInfo?.agency || ''},${bankInfo?.account || ''},${bankInfo?.account_type || ''},${bankInfo?.pix || ''}`;
+          const formattedDate = format(new Date(absence.absence_date), "dd/MM/yyyy");
+          return [
+            formattedDate,
+            absence.employee_name,
+            absence.employee_cpf,
+            absence.position_title,
+            absence.workplace,
+            absence.coverage_name,
+            absence.coverage_cpf,
+            absence.coverage_value,
+            bankInfo?.bank || '',
+            bankInfo?.agency || '',
+            bankInfo?.account || '',
+            bankInfo?.account_type || '',
+            bankInfo?.pix || '',
+            absence.status,
+          ].join(",");
         })
       ].join("\n");
 
       const blob = new Blob([csv], { type: "text/csv" });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
+      const currentDate = format(new Date(), "dd-MM-yyyy", { locale: ptBR });
       a.href = url;
-      a.download = "prestadores.csv";
+      a.download = `prestadores-${currentDate}.csv`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (error: any) {
+      toast({
+        title: "Erro ao baixar relatório",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDownloadMonthlyReport = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("absences")
+        .select("*")
+        .order("absence_date", { ascending: true });
+
+      if (error) throw error;
+
+      const headers = [
+        "Data da Falta",
+        "Nome do Funcionário",
+        "CPF do Funcionário",
+        "Função",
+        "Posto",
+        "Tipo de Cobertura",
+        "Nome do Cobertor",
+        "CPF do Cobertor",
+        "Status",
+        "Justificado"
+      ];
+
+      const csv = [
+        headers.join(","),
+        ...data.map(absence => {
+          const formattedDate = format(new Date(absence.absence_date), "dd/MM/yyyy");
+          return [
+            formattedDate,
+            absence.employee_name,
+            absence.employee_cpf,
+            absence.position_title,
+            absence.workplace,
+            absence.coverage_type === "standby" ? "Standby" : "Prestador",
+            absence.coverage_name,
+            absence.coverage_cpf,
+            absence.status,
+            absence.justification_file_url ? "Sim" : "Não"
+          ].join(",");
+        })
+      ].join("\n");
+
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const currentDate = format(new Date(), "dd-MM-yyyy", { locale: ptBR });
+      a.href = url;
+      a.download = `faltas-${currentDate}.csv`;
       a.click();
       window.URL.revokeObjectURL(url);
     } catch (error: any) {
@@ -168,9 +262,13 @@ const LancamentoFaltas = () => {
               </p>
             </div>
             <div className="flex gap-4">
+              <Button variant="outline" onClick={handleDownloadMonthlyReport}>
+                <FileDown className="mr-2 h-4 w-4" />
+                Relatório de Faltas
+              </Button>
               <Button variant="outline" onClick={handleDownloadReport}>
                 <FileDown className="mr-2 h-4 w-4" />
-                Baixar Relatório
+                Relatório de Prestadores
               </Button>
               <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
@@ -211,3 +309,4 @@ const LancamentoFaltas = () => {
 };
 
 export default LancamentoFaltas;
+
