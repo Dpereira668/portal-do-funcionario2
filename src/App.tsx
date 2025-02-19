@@ -15,7 +15,15 @@ import Cadastro from "./pages/auth/Cadastro";
 import PrivateRoute from "./components/PrivateRoute";
 import { AuthProvider } from "./contexts/AuthContext";
 
-const queryClient = new QueryClient();
+// Criar uma nova instância do QueryClient fora do componente
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
