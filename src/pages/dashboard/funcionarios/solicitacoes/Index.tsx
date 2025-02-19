@@ -132,6 +132,7 @@ const SolicitacoesDoFuncionario = () => {
           {solicitacoesFiltradas.map((solicitacao: any) => (
             <SolicitacaoCard
               key={solicitacao.id}
+              id={solicitacao.id}
               tipo={solicitacao.type}
               status={solicitacao.status}
               dataInicio={format(new Date(solicitacao.created_at), 'dd/MM/yyyy')}
