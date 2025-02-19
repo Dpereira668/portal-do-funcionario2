@@ -9,6 +9,7 @@ import FuncionarioLayout from "./components/layout/FuncionarioLayout";
 import DashboardIndex from "./pages/dashboard/Index";
 import SolicitacoesIndex from "./pages/dashboard/solicitacoes/Index";
 import FuncionariosIndex from "./pages/dashboard/funcionarios/Index";
+import SolicitacoesDoFuncionario from "./pages/dashboard/funcionarios/solicitacoes/Index";
 
 const queryClient = new QueryClient();
 
@@ -28,8 +29,8 @@ const App = () => (
 
         {/* Rotas de Funcionário */}
         <Route path="/funcionario" element={<FuncionarioLayout />}>
-          <Route index element={<FuncionariosIndex />} />
-          <Route path="solicitacoes" element={<FuncionariosIndex />} />
+          <Route index element={<SolicitacoesDoFuncionario />} />
+          <Route path="solicitacoes" element={<SolicitacoesDoFuncionario />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />
