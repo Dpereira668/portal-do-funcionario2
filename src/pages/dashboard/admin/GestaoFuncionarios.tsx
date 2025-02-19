@@ -21,6 +21,7 @@ import { supabase } from "@/lib/supabase";
 import { useQuery } from "@tanstack/react-query";
 import { FileText, Plus, Upload } from "lucide-react";
 import { useState } from "react";
+import { AVAILABLE_POSITIONS } from "@/constants/positions";
 
 interface Employee {
   cpf: string;
@@ -44,15 +45,6 @@ const GestaoFuncionarios = () => {
     },
   });
 
-  const { data: workplaces } = useQuery({
-    queryKey: ["workplaces"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("workplaces").select("*");
-      if (error) throw error;
-      return data;
-    },
-  });
-
   const { data: employees, refetch: refetchEmployees } = useQuery({
     queryKey: ["employees"],
     queryFn: async () => {
@@ -60,8 +52,7 @@ const GestaoFuncionarios = () => {
         .from("profiles")
         .select(`
           *,
-          positions(title),
-          workplaces(name)
+          positions(title)
         `)
         .not("position_id", "is", null);
       
@@ -69,7 +60,6 @@ const GestaoFuncionarios = () => {
       return data.map(emp => ({
         ...emp,
         position_title: emp.positions?.title,
-        workplace_name: emp.workplaces?.name
       }));
     },
   });
@@ -96,23 +86,12 @@ const GestaoFuncionarios = () => {
           positionId = data?.id;
         }
 
-        // Encontra ou cria o local de trabalho
-        let workplaceId = workplaces?.find(w => w.name.toLowerCase() === workplace.toLowerCase())?.id;
-        if (!workplaceId) {
-          const { data } = await supabase
-            .from("workplaces")
-            .insert({ name: workplace })
-            .select("id")
-            .single();
-          workplaceId = data?.id;
-        }
-
         // Cria o perfil do funcionário
         await supabase.from("profiles").insert({
           name,
           cpf,
           position_id: positionId,
-          workplace_id: workplaceId,
+          workplace: workplace, // Agora armazenamos diretamente o local de trabalho
           role: 'funcionario'
         });
       }
@@ -132,10 +111,40 @@ const GestaoFuncionarios = () => {
     }
   };
 
-  const handleAddEmployee = async (employee: Employee) => {
+  const handleAddEmployee = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const employeeData = {
+      name: formData.get("name") as string,
+      cpf: formData.get("cpf") as string,
+      position: formData.get("position") as string,
+      workplace: formData.get("workplace") as string,
+    };
+
     try {
+      // Primeiro, verifica se o cargo já existe ou cria um novo
+      let positionId;
+      const existingPosition = positions?.find(
+        p => p.title.toLowerCase() === employeeData.position.toLowerCase()
+      );
+
+      if (existingPosition) {
+        positionId = existingPosition.id;
+      } else {
+        const { data: newPosition } = await supabase
+          .from("positions")
+          .insert({ title: employeeData.position })
+          .select("id")
+          .single();
+        positionId = newPosition?.id;
+      }
+
+      // Cria o perfil do funcionário
       const { error } = await supabase.from("profiles").insert({
-        ...employee,
+        name: employeeData.name,
+        cpf: employeeData.cpf,
+        position_id: positionId,
+        workplace: employeeData.workplace,
         role: 'funcionario'
       });
 
@@ -192,16 +201,7 @@ const GestaoFuncionarios = () => {
                   Preencha os dados do novo funcionário
                 </DialogDescription>
               </DialogHeader>
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                const formData = new FormData(e.currentTarget);
-                handleAddEmployee({
-                  name: formData.get("name") as string,
-                  cpf: formData.get("cpf") as string,
-                  position_id: formData.get("position_id") as string,
-                  workplace_id: formData.get("workplace_id") as string,
-                });
-              }} className="space-y-4">
+              <form onSubmit={handleAddEmployee} className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Nome</label>
                   <Input name="name" required />
@@ -212,25 +212,18 @@ const GestaoFuncionarios = () => {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Cargo</label>
-                  <select name="position_id" className="w-full p-2 border rounded-md" required>
+                  <select name="position" className="w-full p-2 border rounded-md" required>
                     <option value="">Selecione um cargo</option>
-                    {positions?.map((position) => (
-                      <option key={position.id} value={position.id}>
-                        {position.title}
+                    {AVAILABLE_POSITIONS.map((position) => (
+                      <option key={position} value={position}>
+                        {position}
                       </option>
                     ))}
                   </select>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Local de Trabalho</label>
-                  <select name="workplace_id" className="w-full p-2 border rounded-md" required>
-                    <option value="">Selecione um local</option>
-                    {workplaces?.map((workplace) => (
-                      <option key={workplace.id} value={workplace.id}>
-                        {workplace.name}
-                      </option>
-                    ))}
-                  </select>
+                  <Input name="workplace" required placeholder="Digite o local de trabalho" />
                 </div>
                 <Button type="submit" className="w-full">
                   Adicionar
@@ -254,7 +247,7 @@ const GestaoFuncionarios = () => {
                   <strong>Cargo:</strong> {employee.position_title}
                 </p>
                 <p className="text-sm">
-                  <strong>Local:</strong> {employee.workplace_name}
+                  <strong>Local:</strong> {employee.workplace}
                 </p>
               </div>
             </CardContent>
