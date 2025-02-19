@@ -125,35 +125,56 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: string | null
+          admission_date: string | null
+          avatar_url: string | null
+          birth_date: string | null
           cpf: string | null
           created_at: string
           department: string | null
+          email: string | null
           id: string
           name: string | null
+          phone: string | null
           position_id: string | null
           role: string | null
+          status: string | null
           updated_at: string
           workplace_id: string | null
         }
         Insert: {
+          address?: string | null
+          admission_date?: string | null
+          avatar_url?: string | null
+          birth_date?: string | null
           cpf?: string | null
           created_at?: string
           department?: string | null
+          email?: string | null
           id: string
           name?: string | null
+          phone?: string | null
           position_id?: string | null
           role?: string | null
+          status?: string | null
           updated_at?: string
           workplace_id?: string | null
         }
         Update: {
+          address?: string | null
+          admission_date?: string | null
+          avatar_url?: string | null
+          birth_date?: string | null
           cpf?: string | null
           created_at?: string
           department?: string | null
+          email?: string | null
           id?: string
           name?: string | null
+          phone?: string | null
           position_id?: string | null
           role?: string | null
+          status?: string | null
           updated_at?: string
           workplace_id?: string | null
         }
@@ -173,6 +194,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      registration_requests: {
+        Row: {
+          cpf: string
+          created_at: string
+          email: string
+          id: string
+          name: string
+          phone: string | null
+          position_title: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          cpf: string
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          phone?: string | null
+          position_title?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cpf?: string
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          phone?: string | null
+          position_title?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       requests: {
         Row: {
