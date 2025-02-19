@@ -54,7 +54,7 @@ const AdminLayout = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SidebarProvider defaultCollapsed={isMobile}>
+      <SidebarProvider defaultOpen={!isMobile}>
         <div className="min-h-screen flex w-full">
           <Sidebar className="z-50">
             <ScrollArea className="h-full">
