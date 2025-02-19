@@ -11,7 +11,7 @@ interface NovaSolicitacaoFormProps {
 }
 
 const NovaSolicitacaoForm = ({ onSuccess, tipoInicial }: NovaSolicitacaoFormProps) => {
-  const { novaSolicitacao, loading, handleChange, handleSubmit } = useSolicitacaoForm({
+  const { novaSolicitacao, loading, handleChange } = useSolicitacaoForm({
     onSuccess,
     tipoInicial,
   });
@@ -20,10 +20,8 @@ const NovaSolicitacaoForm = ({ onSuccess, tipoInicial }: NovaSolicitacaoFormProp
     <form onSubmit={handleSubmit} className="space-y-4 mt-4">
       {novaSolicitacao.tipo === "uniforme" && (
         <UniformeForm
-          tipoUniforme={novaSolicitacao.tipoUniforme}
-          tamanhoUniforme={novaSolicitacao.tamanhoUniforme}
-          quantidade={novaSolicitacao.quantidade}
-          onChange={handleChange}
+          itens={novaSolicitacao.uniformeItens}
+          onChange={(novoItens) => handleChange("uniformeItens", novoItens)}
         />
       )}
 

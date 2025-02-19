@@ -14,7 +14,7 @@ interface UniformeFormProps {
   onChange: (items: UniformItem[]) => void;
 }
 
-const UniformeForm = ({ itens, onChange }: UniformeFormProps) => {
+const UniformeForm = ({ itens = [], onChange }: UniformeFormProps) => {
   const handleAddItem = () => {
     onChange([
       ...itens,
