@@ -1,9 +1,14 @@
-
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useQueryClient } from "@tanstack/react-query";
+
+interface UniformItem {
+  tipoUniforme: string;
+  tamanhoUniforme: string;
+  quantidade: number;
+}
 
 interface UseSolicitacaoFormProps {
   onSuccess: () => void;
@@ -20,14 +25,12 @@ export const useSolicitacaoForm = ({ onSuccess, tipoInicial }: UseSolicitacaoFor
     dataInicio: "",
     dataFim: "",
     observacoes: "",
-    tamanhoUniforme: "",
-    tipoUniforme: "",
-    quantidade: 1,
+    uniformeItens: [{ tipoUniforme: "", tamanhoUniforme: "", quantidade: 1 }],
     advance_amount: 0,
     advance_reason: "",
   });
 
-  const handleChange = (field: string, value: string | number) => {
+  const handleChange = (field: string, value: any) => {
     setNovaSolicitacao((prev) => ({
       ...prev,
       [field]: value,
@@ -40,9 +43,7 @@ export const useSolicitacaoForm = ({ onSuccess, tipoInicial }: UseSolicitacaoFor
       dataInicio: "",
       dataFim: "",
       observacoes: "",
-      tamanhoUniforme: "",
-      tipoUniforme: "",
-      quantidade: 1,
+      uniformeItens: [{ tipoUniforme: "", tamanhoUniforme: "", quantidade: 1 }],
       advance_amount: 0,
       advance_reason: "",
     });
@@ -71,20 +72,37 @@ export const useSolicitacaoForm = ({ onSuccess, tipoInicial }: UseSolicitacaoFor
 
     setLoading(true);
     try {
-      const { error } = await supabase.from('requests').insert({
-        user_id: user.id,
-        type: novaSolicitacao.tipo,
-        start_date: novaSolicitacao.dataInicio,
-        end_date: novaSolicitacao.dataFim || null,
-        notes: novaSolicitacao.observacoes,
-        uniform_type: novaSolicitacao.tipo === 'uniforme' ? novaSolicitacao.tipoUniforme : null,
-        uniform_size: novaSolicitacao.tipo === 'uniforme' ? novaSolicitacao.tamanhoUniforme : null,
-        uniform_quantity: novaSolicitacao.tipo === 'uniforme' ? novaSolicitacao.quantidade : null,
-        advance_amount: novaSolicitacao.tipo === 'adiantamento' ? novaSolicitacao.advance_amount : null,
-        advance_reason: novaSolicitacao.tipo === 'adiantamento' ? novaSolicitacao.advance_reason : null,
-      });
+      if (novaSolicitacao.tipo === 'uniforme') {
+        const promises = novaSolicitacao.uniformeItens.map(item => 
+          supabase.from('requests').insert({
+            user_id: user.id,
+            type: novaSolicitacao.tipo,
+            notes: novaSolicitacao.observacoes,
+            uniform_type: item.tipoUniforme,
+            uniform_size: item.tamanhoUniforme,
+            uniform_quantity: item.quantidade,
+          })
+        );
 
-      if (error) throw error;
+        const results = await Promise.all(promises);
+        const errors = results.filter(result => result.error);
+
+        if (errors.length > 0) {
+          throw errors[0].error;
+        }
+      } else {
+        const { error } = await supabase.from('requests').insert({
+          user_id: user.id,
+          type: novaSolicitacao.tipo,
+          start_date: novaSolicitacao.dataInicio,
+          end_date: novaSolicitacao.dataFim || null,
+          notes: novaSolicitacao.observacoes,
+          advance_amount: novaSolicitacao.tipo === 'adiantamento' ? novaSolicitacao.advance_amount : null,
+          advance_reason: novaSolicitacao.tipo === 'adiantamento' ? novaSolicitacao.advance_reason : null,
+        });
+
+        if (error) throw error;
+      }
 
       toast({
         title: "Solicitação enviada",
