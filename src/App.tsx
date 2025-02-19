@@ -32,15 +32,35 @@ const App = () => (
           <Route element={<PrivateRoute />}>
             {/* Rotas de Admin */}
             <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<DashboardIndex />} />
-              <Route path="solicitacoes" element={<SolicitacoesIndex />} />
-              <Route path="funcionarios" element={<FuncionariosIndex />} />
+              <Route index element={
+                <div className="animate-fade-in">
+                  <DashboardIndex />
+                </div>
+              } />
+              <Route path="solicitacoes" element={
+                <div className="animate-fade-in">
+                  <SolicitacoesIndex />
+                </div>
+              } />
+              <Route path="funcionarios" element={
+                <div className="animate-fade-in">
+                  <FuncionariosIndex />
+                </div>
+              } />
             </Route>
 
             {/* Rotas de Funcionário */}
             <Route path="/funcionario" element={<FuncionarioLayout />}>
-              <Route index element={<FuncionariosIndex />} />
-              <Route path="solicitacoes" element={<SolicitacoesDoFuncionario />} />
+              <Route index element={
+                <div className="animate-fade-in">
+                  <FuncionariosIndex />
+                </div>
+              } />
+              <Route path="solicitacoes" element={
+                <div className="animate-fade-in">
+                  <SolicitacoesDoFuncionario />
+                </div>
+              } />
             </Route>
           </Route>
 
