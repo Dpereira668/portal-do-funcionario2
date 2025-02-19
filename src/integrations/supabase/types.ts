@@ -350,6 +350,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       set_admin_role: {
         Args: {
           user_id: string
@@ -358,7 +362,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      user_role: "admin" | "funcionario"
     }
     CompositeTypes: {
       [_ in never]: never
