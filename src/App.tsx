@@ -4,9 +4,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import DashboardLayout from "./components/layout/DashboardLayout";
+import AdminLayout from "./components/layout/AdminLayout";
+import FuncionarioLayout from "./components/layout/FuncionarioLayout";
 import DashboardIndex from "./pages/dashboard/Index";
 import SolicitacoesIndex from "./pages/dashboard/solicitacoes/Index";
+import FuncionariosIndex from "./pages/dashboard/funcionarios/Index";
 
 const queryClient = new QueryClient();
 
@@ -16,10 +18,20 @@ const App = () => (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Index />} />
-        <Route path="/dashboard" element={<DashboardLayout />}>
+        
+        {/* Rotas de Admin */}
+        <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<DashboardIndex />} />
           <Route path="solicitacoes" element={<SolicitacoesIndex />} />
+          <Route path="funcionarios" element={<FuncionariosIndex />} />
         </Route>
+
+        {/* Rotas de Funcionário */}
+        <Route path="/funcionario" element={<FuncionarioLayout />}>
+          <Route index element={<DashboardIndex />} />
+          <Route path="solicitacoes" element={<FuncionariosIndex />} />
+        </Route>
+
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
