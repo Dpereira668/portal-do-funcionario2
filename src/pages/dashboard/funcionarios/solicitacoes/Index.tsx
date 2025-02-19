@@ -1,4 +1,3 @@
-
 import {
   Card,
   CardContent,
@@ -16,7 +15,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
-import { Calendar, FileText, List, Plus } from "lucide-react";
+import { Calendar, FileText, List, Plus, Shirt } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -27,16 +26,27 @@ const SolicitacoesDoFuncionario = () => {
     dataInicio: "",
     dataFim: "",
     observacoes: "",
+    tamanhoUniforme: "",
+    tipoUniforme: "",
+    quantidade: 1,
   });
 
-  // Estado para controlar a ordenação e filtros
   const [filtroStatus, setFiltroStatus] = useState("todos");
-  const [ordenacao, setOrdenacao] = useState("data"); // data ou status
+  const [ordenacao, setOrdenacao] = useState("data");
 
-  // Dados mockados para demonstração
   const minhasSolicitacoes = [
     {
       id: 1,
+      tipo: "Uniforme",
+      status: "Pendente",
+      dataInicio: "15/04/2024",
+      dataFim: "15/04/2024",
+      observacoes: "Solicitação de uniforme novo",
+      detalhes: "Camisa social - Tamanho M - 2 unidades",
+      icon: Shirt,
+    },
+    {
+      id: 2,
       tipo: "Férias",
       status: "Pendente",
       dataInicio: "15/04/2024",
@@ -45,7 +55,7 @@ const SolicitacoesDoFuncionario = () => {
       icon: Calendar,
     },
     {
-      id: 2,
+      id: 3,
       tipo: "Declaração",
       status: "Aprovado",
       dataInicio: "12/04/2024",
@@ -54,7 +64,7 @@ const SolicitacoesDoFuncionario = () => {
       icon: FileText,
     },
     {
-      id: 3,
+      id: 4,
       tipo: "Outros",
       status: "Rejeitado",
       dataInicio: "10/04/2024",
@@ -78,32 +88,42 @@ const SolicitacoesDoFuncionario = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validações básicas
-    if (!novaSolicitacao.tipo || !novaSolicitacao.dataInicio || !novaSolicitacao.dataFim) {
+    if (!novaSolicitacao.tipo) {
       toast({
         title: "Erro na solicitação",
-        description: "Por favor, preencha todos os campos obrigatórios.",
+        description: "Por favor, selecione o tipo de solicitação.",
         variant: "destructive",
       });
       return;
     }
 
-    // Aqui seria feita a integração com o backend
+    if (novaSolicitacao.tipo === "uniforme") {
+      if (!novaSolicitacao.tamanhoUniforme || !novaSolicitacao.tipoUniforme) {
+        toast({
+          title: "Erro na solicitação",
+          description: "Por favor, preencha todos os campos do uniforme.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     toast({
       title: "Solicitação enviada",
       description: "Sua solicitação foi enviada com sucesso!",
     });
 
-    // Limpa o formulário
     setNovaSolicitacao({
       tipo: "",
       dataInicio: "",
       dataFim: "",
       observacoes: "",
+      tamanhoUniforme: "",
+      tipoUniforme: "",
+      quantidade: 1,
     });
   };
 
-  // Filtra e ordena as solicitações
   const solicitacoesFiltradas = minhasSolicitacoes
     .filter((sol) => filtroStatus === "todos" || sol.status === filtroStatus)
     .sort((a, b) => {
@@ -152,39 +172,79 @@ const SolicitacoesDoFuncionario = () => {
                   required
                 >
                   <option value="">Selecione o tipo</option>
+                  <option value="uniforme">Uniforme</option>
                   <option value="ferias">Férias</option>
                   <option value="documento">Documento</option>
                   <option value="outros">Outros</option>
                 </select>
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Data de Início</label>
-                <Input
-                  type="date"
-                  value={novaSolicitacao.dataInicio}
-                  onChange={(e) =>
-                    setNovaSolicitacao({
-                      ...novaSolicitacao,
-                      dataInicio: e.target.value,
-                    })
-                  }
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Data de Fim</label>
-                <Input
-                  type="date"
-                  value={novaSolicitacao.dataFim}
-                  onChange={(e) =>
-                    setNovaSolicitacao({
-                      ...novaSolicitacao,
-                      dataFim: e.target.value,
-                    })
-                  }
-                  required
-                />
-              </div>
+
+              {novaSolicitacao.tipo === "uniforme" && (
+                <>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Tipo de Uniforme</label>
+                    <select
+                      className="w-full p-2 border rounded-md"
+                      value={novaSolicitacao.tipoUniforme}
+                      onChange={(e) =>
+                        setNovaSolicitacao({
+                          ...novaSolicitacao,
+                          tipoUniforme: e.target.value,
+                        })
+                      }
+                      required
+                    >
+                      <option value="">Selecione o tipo</option>
+                      <option value="camisa-social">Camisa Social</option>
+                      <option value="camisa-polo">Camisa Polo</option>
+                      <option value="calca">Calça</option>
+                      <option value="blazer">Blazer</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Tamanho</label>
+                    <select
+                      className="w-full p-2 border rounded-md"
+                      value={novaSolicitacao.tamanhoUniforme}
+                      onChange={(e) =>
+                        setNovaSolicitacao({
+                          ...novaSolicitacao,
+                          tamanhoUniforme: e.target.value,
+                        })
+                      }
+                      required
+                    >
+                      <option value="">Selecione o tamanho</option>
+                      <option value="PP">PP</option>
+                      <option value="P">P</option>
+                      <option value="M">M</option>
+                      <option value="G">G</option>
+                      <option value="GG">GG</option>
+                      <option value="XG">XG</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Quantidade</label>
+                    <Input
+                      type="number"
+                      min="1"
+                      max="5"
+                      value={novaSolicitacao.quantidade}
+                      onChange={(e) =>
+                        setNovaSolicitacao({
+                          ...novaSolicitacao,
+                          quantidade: parseInt(e.target.value),
+                        })
+                      }
+                      required
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Máximo de 5 unidades por solicitação
+                    </p>
+                  </div>
+                </>
+              )}
+
               <div className="space-y-2">
                 <label className="text-sm font-medium">Observações</label>
                 <textarea
@@ -196,6 +256,7 @@ const SolicitacoesDoFuncionario = () => {
                       observacoes: e.target.value,
                     })
                   }
+                  placeholder="Adicione observações importantes sobre sua solicitação..."
                 />
               </div>
               <Button type="submit" className="w-full">
@@ -206,7 +267,6 @@ const SolicitacoesDoFuncionario = () => {
         </Sheet>
       </div>
 
-      {/* Filtros e Ordenação */}
       <div className="flex gap-4">
         <select
           className="p-2 border rounded-md"
