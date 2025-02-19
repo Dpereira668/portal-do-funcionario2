@@ -8,14 +8,17 @@ import {
   SidebarProvider,
 } from "@/components/ui/sidebar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Bell, Home, Users, Calendar, UserX } from "lucide-react";
+import { Bell, Home, Users, Calendar, UserX, AlertTriangle } from "lucide-react";
 import { Outlet } from "react-router-dom";
 import SidebarMenuList, { MenuItem } from "../ui/SidebarMenuList";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const queryClient = new QueryClient();
 
 const AdminLayout = () => {
+  const isMobile = useIsMobile();
+
   const menuItems: MenuItem[] = [
     {
       title: "Dashboard",
@@ -42,13 +45,18 @@ const AdminLayout = () => {
       icon: UserX,
       path: "/admin/lancamento-faltas",
     },
+    {
+      title: "Punições",
+      icon: AlertTriangle,
+      path: "/admin/punicoes",
+    },
   ];
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SidebarProvider>
+      <SidebarProvider defaultCollapsed={isMobile}>
         <div className="min-h-screen flex w-full">
-          <Sidebar>
+          <Sidebar className="z-50">
             <ScrollArea className="h-full">
               <SidebarContent>
                 <SidebarGroup>
@@ -60,7 +68,7 @@ const AdminLayout = () => {
               </SidebarContent>
             </ScrollArea>
           </Sidebar>
-          <main className="flex-1 overflow-hidden">
+          <main className="flex-1 overflow-hidden bg-background">
             <Outlet />
           </main>
         </div>

@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Bell, Calendar, User, Users } from "lucide-react";
+import { Bell, Calendar, User, Users, AlertTriangle } from "lucide-react";
 
 const DashboardIndex = () => {
   const stats = [
@@ -29,17 +29,17 @@ const DashboardIndex = () => {
       description: "Próximos 30 dias",
     },
     {
-      title: "Meu Perfil",
-      value: "2",
-      icon: <User className="h-4 w-4 text-muted-foreground" />,
-      description: "Solicitações enviadas",
+      title: "Punições Ativas",
+      value: "3",
+      icon: <AlertTriangle className="h-4 w-4 text-muted-foreground" />,
+      description: "Advertências e Suspensões",
     },
   ];
 
   return (
-    <div className="h-full p-8 bg-gradient-to-br from-primary/5 to-secondary/5">
+    <div className="h-full p-4 md:p-8 bg-gradient-to-br from-primary/5 to-secondary/5">
       <div className="space-y-4">
-        <h2 className="text-3xl font-bold text-primary">Dashboard</h2>
+        <h2 className="text-2xl md:text-3xl font-bold text-primary">Dashboard</h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat, index) => (
             <Card key={index} className="hover:shadow-lg transition-shadow">

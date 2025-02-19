@@ -195,6 +195,42 @@ export type Database = {
           },
         ]
       }
+      punishments: {
+        Row: {
+          created_at: string | null
+          document_url: string | null
+          employee_id: string | null
+          end_date: string | null
+          id: string
+          reason: string
+          start_date: string
+          type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          document_url?: string | null
+          employee_id?: string | null
+          end_date?: string | null
+          id?: string
+          reason: string
+          start_date: string
+          type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          document_url?: string | null
+          employee_id?: string | null
+          end_date?: string | null
+          id?: string
+          reason?: string
+          start_date?: string
+          type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       registration_requests: {
         Row: {
           cpf: string
@@ -236,6 +272,9 @@ export type Database = {
           advance_amount: number | null
           advance_reason: string | null
           created_at: string
+          delivery_confirmation_url: string | null
+          delivery_date: string | null
+          delivery_status: string | null
           end_date: string | null
           id: string
           notes: string | null
@@ -252,6 +291,9 @@ export type Database = {
           advance_amount?: number | null
           advance_reason?: string | null
           created_at?: string
+          delivery_confirmation_url?: string | null
+          delivery_date?: string | null
+          delivery_status?: string | null
           end_date?: string | null
           id?: string
           notes?: string | null
@@ -268,6 +310,9 @@ export type Database = {
           advance_amount?: number | null
           advance_reason?: string | null
           created_at?: string
+          delivery_confirmation_url?: string | null
+          delivery_date?: string | null
+          delivery_status?: string | null
           end_date?: string | null
           id?: string
           notes?: string | null

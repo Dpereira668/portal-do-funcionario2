@@ -1,4 +1,3 @@
-
 import {
   Card,
   CardContent,
@@ -8,6 +7,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Calendar, FileText, Coffee, Shirt } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 
 const SolicitacoesIndex = () => {
   const { toast } = useToast();
@@ -76,8 +76,36 @@ const SolicitacoesIndex = () => {
     });
   };
 
+  const handleConfirmDelivery = async (id: number) => {
+    const solicitacao = solicitacoes.find(s => s.id === id);
+    if (!solicitacao) return;
+
+    try {
+      const { data: updatedRequest, error } = await supabase
+        .from('requests')
+        .update({
+          delivery_status: 'entregue',
+          delivery_date: new Date().toISOString(),
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Entrega confirmada",
+        description: `A entrega do uniforme para ${solicitacao.funcionario} foi confirmada com sucesso.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro ao confirmar entrega",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
-    <div className="p-8 space-y-6 animate-fade-in">
+    <div className="p-4 md:p-8 space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-bold text-primary">Solicitações</h2>
@@ -87,7 +115,7 @@ const SolicitacoesIndex = () => {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
+      <div className="grid gap-4">
         {solicitacoes.map((solicitacao) => (
           <Card 
             key={solicitacao.id} 
