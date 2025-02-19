@@ -11,6 +11,7 @@ import SolicitacoesIndex from "./pages/dashboard/solicitacoes/Index";
 import FuncionariosIndex from "./pages/dashboard/funcionarios/Index";
 import SolicitacoesDoFuncionario from "./pages/dashboard/funcionarios/solicitacoes/Index";
 import Login from "./pages/auth/Login";
+import Cadastro from "./pages/auth/Cadastro";
 import PrivateRoute from "./components/PrivateRoute";
 import { AuthProvider } from "./contexts/AuthContext";
 
@@ -25,6 +26,7 @@ const App = () => (
           {/* Rotas Públicas */}
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/cadastro" element={<Cadastro />} />
 
           {/* Rotas Protegidas */}
           <Route element={<PrivateRoute />}>
