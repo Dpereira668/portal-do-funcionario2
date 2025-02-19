@@ -10,18 +10,13 @@ import {
   SidebarMenuItem,
   SidebarProvider,
 } from "@/components/ui/sidebar";
-import { Bell, Home, User } from "lucide-react";
+import { Bell, User } from "lucide-react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 
 const FuncionarioLayout = () => {
   const location = useLocation();
 
   const menuItems = [
-    {
-      title: "Dashboard",
-      icon: Home,
-      path: "/funcionario",
-    },
     {
       title: "Minhas Solicitações",
       icon: Bell,
