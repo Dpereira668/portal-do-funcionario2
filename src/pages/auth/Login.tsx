@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { AuthError } from "@supabase/supabase-js";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -18,11 +19,30 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
 
+  const getErrorMessage = (error: AuthError) => {
+    switch (error.message) {
+      case "Invalid login credentials":
+        return "Email ou senha inválidos. Por favor, verifique suas credenciais.";
+      case "Email not confirmed":
+        return "Por favor, confirme seu email antes de fazer login.";
+      default:
+        return "Ocorreu um erro ao fazer login. Por favor, tente novamente.";
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email || !password) {
+      return;
+    }
     setLoading(true);
-    await signIn(email, password);
-    setLoading(false);
+    try {
+      await signIn(email, password);
+    } catch (error: any) {
+      console.error("Login error:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -64,7 +84,7 @@ const Login = () => {
             <Button
               type="submit"
               className="w-full"
-              disabled={loading}
+              disabled={loading || !email || !password}
             >
               {loading ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />

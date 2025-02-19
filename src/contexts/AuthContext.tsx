@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Session, User } from "@supabase/supabase-js";
+import { Session, User, AuthError } from "@supabase/supabase-js";
 
 interface AuthContextType {
   user: User | null;
@@ -39,6 +39,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
+  const handleAuthError = (error: AuthError, action: string) => {
+    let message = "";
+    switch (error.message) {
+      case "Invalid login credentials":
+        message = "Email ou senha inválidos";
+        break;
+      case "Email not confirmed":
+        message = "Por favor, confirme seu email antes de fazer login";
+        break;
+      case "User already registered":
+        message = "Este email já está cadastrado";
+        break;
+      default:
+        message = `Erro ao ${action}`;
+    }
+
+    toast({
+      title: `Erro ao ${action}`,
+      description: message,
+      variant: "destructive",
+    });
+
+    throw error;
+  };
+
   const signIn = async (email: string, password: string) => {
     try {
       const { error } = await supabase.auth.signInWithPassword({
@@ -55,11 +80,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       navigate("/admin");
     } catch (error: any) {
-      toast({
-        title: "Erro ao fazer login",
-        description: error.message,
-        variant: "destructive",
-      });
+      handleAuthError(error, "fazer login");
     }
   };
 
@@ -77,11 +98,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         description: "Verifique seu email para confirmar o cadastro.",
       });
     } catch (error: any) {
-      toast({
-        title: "Erro ao criar conta",
-        description: error.message,
-        variant: "destructive",
-      });
+      handleAuthError(error, "criar conta");
     }
   };
 
@@ -91,11 +108,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (error) throw error;
       navigate("/");
     } catch (error: any) {
-      toast({
-        title: "Erro ao sair",
-        description: error.message,
-        variant: "destructive",
-      });
+      handleAuthError(error, "sair");
     }
   };
 
