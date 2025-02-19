@@ -7,6 +7,7 @@ import {
   SidebarGroupLabel,
   SidebarProvider,
 } from "@/components/ui/sidebar";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Bell, Home, Users, Calendar, UserX } from "lucide-react";
 import { Outlet } from "react-router-dom";
 import SidebarMenuList, { MenuItem } from "../ui/SidebarMenuList";
@@ -44,16 +45,18 @@ const AdminLayout = () => {
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
         <Sidebar>
-          <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupLabel>Administração</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenuList items={menuItems} label="Menu de Administração" />
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </SidebarContent>
+          <ScrollArea className="h-full">
+            <SidebarContent>
+              <SidebarGroup>
+                <SidebarGroupLabel>Administração</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenuList items={menuItems} label="Menu de Administração" />
+                </SidebarGroupContent>
+              </SidebarGroup>
+            </SidebarContent>
+          </ScrollArea>
         </Sidebar>
-        <main className="flex-1 overflow-y-auto animate-fade-in">
+        <main className="flex-1 overflow-hidden">
           <Outlet />
         </main>
       </div>

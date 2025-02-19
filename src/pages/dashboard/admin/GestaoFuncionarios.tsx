@@ -16,6 +16,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import { useQuery } from "@tanstack/react-query";
@@ -24,12 +25,12 @@ import { useState } from "react";
 import { AVAILABLE_POSITIONS } from "@/constants/positions";
 
 interface Employee {
+  id: string;
   cpf: string;
   name: string;
   position_id: string;
-  workplace_id: string;
+  workplace: string;
   position_title?: string;
-  workplace_name?: string;
 }
 
 const GestaoFuncionarios = () => {
@@ -91,7 +92,7 @@ const GestaoFuncionarios = () => {
           name,
           cpf,
           position_id: positionId,
-          workplace: workplace, // Agora armazenamos diretamente o local de trabalho
+          workplace,
           role: 'funcionario'
         });
       }
@@ -114,18 +115,13 @@ const GestaoFuncionarios = () => {
   const handleAddEmployee = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const employeeData = {
-      name: formData.get("name") as string,
-      cpf: formData.get("cpf") as string,
-      position: formData.get("position") as string,
-      workplace: formData.get("workplace") as string,
-    };
-
+    
     try {
       // Primeiro, verifica se o cargo já existe ou cria um novo
       let positionId;
+      const positionTitle = formData.get("position") as string;
       const existingPosition = positions?.find(
-        p => p.title.toLowerCase() === employeeData.position.toLowerCase()
+        p => p.title.toLowerCase() === positionTitle.toLowerCase()
       );
 
       if (existingPosition) {
@@ -133,7 +129,7 @@ const GestaoFuncionarios = () => {
       } else {
         const { data: newPosition } = await supabase
           .from("positions")
-          .insert({ title: employeeData.position })
+          .insert({ title: positionTitle })
           .select("id")
           .single();
         positionId = newPosition?.id;
@@ -141,10 +137,10 @@ const GestaoFuncionarios = () => {
 
       // Cria o perfil do funcionário
       const { error } = await supabase.from("profiles").insert({
-        name: employeeData.name,
-        cpf: employeeData.cpf,
+        name: formData.get("name") as string,
+        cpf: formData.get("cpf") as string,
         position_id: positionId,
-        workplace: employeeData.workplace,
+        workplace: formData.get("workplace") as string,
         role: 'funcionario'
       });
 
@@ -167,94 +163,96 @@ const GestaoFuncionarios = () => {
   };
 
   return (
-    <div className="p-8 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-3xl font-bold text-primary">Gestão de Funcionários</h2>
-          <p className="text-muted-foreground">
-            Gerencie os funcionários da empresa
-          </p>
-        </div>
-        <div className="flex gap-4">
-          <Button variant="outline" onClick={() => document.getElementById('file-upload')?.click()}>
-            <Upload className="mr-2 h-4 w-4" />
-            Importar XML
-            <input
-              id="file-upload"
-              type="file"
-              accept=".csv,.xml"
-              className="hidden"
-              onChange={handleFileUpload}
-            />
-          </Button>
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Adicionar Funcionário
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Adicionar Funcionário</DialogTitle>
-                <DialogDescription>
-                  Preencha os dados do novo funcionário
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handleAddEmployee} className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Nome</label>
-                  <Input name="name" required />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">CPF</label>
-                  <Input name="cpf" required pattern="\d{11}" maxLength={11} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Cargo</label>
-                  <select name="position" className="w-full p-2 border rounded-md" required>
-                    <option value="">Selecione um cargo</option>
-                    {AVAILABLE_POSITIONS.map((position) => (
-                      <option key={position} value={position}>
-                        {position}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Local de Trabalho</label>
-                  <Input name="workplace" required placeholder="Digite o local de trabalho" />
-                </div>
-                <Button type="submit" className="w-full">
-                  Adicionar
+    <ScrollArea className="h-screen">
+      <div className="p-8 space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-3xl font-bold text-primary">Gestão de Funcionários</h2>
+            <p className="text-muted-foreground">
+              Gerencie os funcionários da empresa
+            </p>
+          </div>
+          <div className="flex gap-4">
+            <Button variant="outline" onClick={() => document.getElementById('file-upload')?.click()}>
+              <Upload className="mr-2 h-4 w-4" />
+              Importar CSV
+              <input
+                id="file-upload"
+                type="file"
+                accept=".csv"
+                className="hidden"
+                onChange={handleFileUpload}
+              />
+            </Button>
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Adicionar Funcionário
                 </Button>
-              </form>
-            </DialogContent>
-          </Dialog>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Adicionar Funcionário</DialogTitle>
+                  <DialogDescription>
+                    Preencha os dados do novo funcionário
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleAddEmployee} className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Nome</label>
+                    <Input name="name" required />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">CPF</label>
+                    <Input name="cpf" required pattern="\d{11}" maxLength={11} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Cargo</label>
+                    <select name="position" className="w-full p-2 border rounded-md" required>
+                      <option value="">Selecione um cargo</option>
+                      {AVAILABLE_POSITIONS.map((position) => (
+                        <option key={position} value={position}>
+                          {position}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Local de Trabalho</label>
+                    <Input name="workplace" required />
+                  </div>
+                  <Button type="submit" className="w-full">
+                    Adicionar
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {employees?.map((employee) => (
+            <Card key={employee.id}>
+              <CardHeader>
+                <CardTitle>{employee.name}</CardTitle>
+                <CardDescription>CPF: {employee.cpf}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <p className="text-sm">
+                    <strong>Cargo:</strong> {employee.position_title}
+                  </p>
+                  <p className="text-sm">
+                    <strong>Local:</strong> {employee.workplace}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {employees?.map((employee) => (
-          <Card key={employee.id}>
-            <CardHeader>
-              <CardTitle>{employee.name}</CardTitle>
-              <CardDescription>CPF: {employee.cpf}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <p className="text-sm">
-                  <strong>Cargo:</strong> {employee.position_title}
-                </p>
-                <p className="text-sm">
-                  <strong>Local:</strong> {employee.workplace}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
+    </ScrollArea>
   );
 };
 

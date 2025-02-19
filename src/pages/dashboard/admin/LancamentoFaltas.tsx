@@ -18,6 +18,7 @@ import { supabase } from "@/lib/supabase";
 import { useQuery } from "@tanstack/react-query";
 import { Download, FileDown, Plus, UploadCloud } from "lucide-react";
 import { useState } from "react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface BankInfo {
   bank: string;
@@ -182,202 +183,204 @@ const LancamentoFaltas = () => {
   };
 
   return (
-    <div className="p-8 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-3xl font-bold text-primary">Lançamento de Faltas</h2>
-          <p className="text-muted-foreground">
-            Gerencie as faltas e coberturas dos funcionários
-          </p>
-        </div>
-        <div className="flex gap-4">
-          <Button variant="outline" onClick={handleDownloadReport}>
-            <FileDown className="mr-2 h-4 w-4" />
-            Baixar Relatório
-          </Button>
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Lançar Falta
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Lançar Falta</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleAddAbsence} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Nome do Funcionário</label>
-                    <Input name="name" required />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">CPF do Funcionário</label>
-                    <Input name="cpf" required pattern="\d{11}" maxLength={11} />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Função</label>
-                    <Input name="position" required />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Posto</label>
-                    <Input name="workplace" required />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Data da Falta</label>
-                    <Input name="date" type="date" required />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Tipo de Cobertura</label>
-                    <select
-                      className="w-full p-2 border rounded-md"
-                      value={coverageType}
-                      onChange={(e) => setCoverageType(e.target.value as "standby" | "prestador")}
-                    >
-                      <option value="standby">Standby</option>
-                      <option value="prestador">Prestador</option>
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Nome do Cobertor</label>
-                    <Input name="coverage_name" required />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">CPF do Cobertor</label>
-                    <Input name="coverage_cpf" required pattern="\d{11}" maxLength={11} />
-                  </div>
-                </div>
-
-                {coverageType === "prestador" && (
-                  <div className="border-t pt-4 mt-4">
-                    <h4 className="font-medium mb-4">Dados Bancários do Prestador</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Valor</label>
-                        <Input name="coverage_value" type="number" step="0.01" required />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Banco</label>
-                        <Input name="bank" required />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Agência</label>
-                        <Input name="agency" required />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Conta</label>
-                        <Input name="account" required />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Tipo de Conta</label>
-                        <select name="account_type" className="w-full p-2 border rounded-md" required>
-                          <option value="corrente">Corrente</option>
-                          <option value="poupanca">Poupança</option>
-                        </select>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">PIX</label>
-                        <Input name="pix" />
-                      </div>
+    <ScrollArea className="h-screen">
+      <div className="p-8 space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-3xl font-bold text-primary">Lançamento de Faltas</h2>
+            <p className="text-muted-foreground">
+              Gerencie as faltas e coberturas dos funcionários
+            </p>
+          </div>
+          <div className="flex gap-4">
+            <Button variant="outline" onClick={handleDownloadReport}>
+              <FileDown className="mr-2 h-4 w-4" />
+              Baixar Relatório
+            </Button>
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Lançar Falta
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Lançar Falta</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleAddAbsence} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Nome do Funcionário</label>
+                      <Input name="name" required />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">CPF do Funcionário</label>
+                      <Input name="cpf" required pattern="\d{11}" maxLength={11} />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Função</label>
+                      <Input name="position" required />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Posto</label>
+                      <Input name="workplace" required />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Data da Falta</label>
+                      <Input name="date" type="date" required />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Tipo de Cobertura</label>
+                      <select
+                        className="w-full p-2 border rounded-md"
+                        value={coverageType}
+                        onChange={(e) => setCoverageType(e.target.value as "standby" | "prestador")}
+                      >
+                        <option value="standby">Standby</option>
+                        <option value="prestador">Prestador</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Nome do Cobertor</label>
+                      <Input name="coverage_name" required />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">CPF do Cobertor</label>
+                      <Input name="coverage_cpf" required pattern="\d{11}" maxLength={11} />
                     </div>
                   </div>
-                )}
 
-                <Button type="submit" className="w-full">
-                  Registrar Falta
-                </Button>
-              </form>
-            </DialogContent>
-          </Dialog>
+                  {coverageType === "prestador" && (
+                    <div className="border-t pt-4 mt-4">
+                      <h4 className="font-medium mb-4">Dados Bancários do Prestador</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Valor</label>
+                          <Input name="coverage_value" type="number" step="0.01" required />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Banco</label>
+                          <Input name="bank" required />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Agência</label>
+                          <Input name="agency" required />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Conta</label>
+                          <Input name="account" required />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Tipo de Conta</label>
+                          <select name="account_type" className="w-full p-2 border rounded-md" required>
+                            <option value="corrente">Corrente</option>
+                            <option value="poupanca">Poupança</option>
+                          </select>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">PIX</label>
+                          <Input name="pix" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <Button type="submit" className="w-full">
+                    Registrar Falta
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {absences?.map((absence) => (
-          <Card key={absence.id}>
-            <CardHeader>
-              <CardTitle className="flex justify-between items-start">
-                <div>
-                  <h3 className="text-lg font-semibold">{absence.employee_name}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(absence.absence_date).toLocaleDateString()}
-                  </p>
-                </div>
-                <span className={`px-2 py-1 rounded-full text-xs ${
-                  absence.status === "justified"
-                    ? "bg-green-100 text-green-800"
-                    : absence.status === "unjustified"
-                    ? "bg-red-100 text-red-800"
-                    : "bg-yellow-100 text-yellow-800"
-                }`}>
-                  {absence.status === "justified"
-                    ? "Justificada"
-                    : absence.status === "unjustified"
-                    ? "Não Justificada"
-                    : "Pendente"}
-                </span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <p className="text-sm">
-                  <strong>CPF:</strong> {absence.employee_cpf}
-                </p>
-                <p className="text-sm">
-                  <strong>Função:</strong> {absence.position_title}
-                </p>
-                <p className="text-sm">
-                  <strong>Posto:</strong> {absence.workplace}
-                </p>
-                <div className="border-t pt-2 mt-2">
-                  <p className="text-sm font-medium">Cobertura ({absence.coverage_type}):</p>
-                  <p className="text-sm">
-                    {absence.coverage_name} (CPF: {absence.coverage_cpf})
-                  </p>
-                  {absence.coverage_type === "prestador" && (
-                    <p className="text-sm">
-                      <strong>Valor:</strong> R$ {absence.coverage_value?.toFixed(2)}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {absences?.map((absence) => (
+            <Card key={absence.id}>
+              <CardHeader>
+                <CardTitle className="flex justify-between items-start">
+                  <div>
+                    <h3 className="text-lg font-semibold">{absence.employee_name}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {new Date(absence.absence_date).toLocaleDateString()}
                     </p>
+                  </div>
+                  <span className={`px-2 py-1 rounded-full text-xs ${
+                    absence.status === "justified"
+                      ? "bg-green-100 text-green-800"
+                      : absence.status === "unjustified"
+                      ? "bg-red-100 text-red-800"
+                      : "bg-yellow-100 text-yellow-800"
+                  }`}>
+                    {absence.status === "justified"
+                      ? "Justificada"
+                      : absence.status === "unjustified"
+                      ? "Não Justificada"
+                      : "Pendente"}
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <p className="text-sm">
+                    <strong>CPF:</strong> {absence.employee_cpf}
+                  </p>
+                  <p className="text-sm">
+                    <strong>Função:</strong> {absence.position_title}
+                  </p>
+                  <p className="text-sm">
+                    <strong>Posto:</strong> {absence.workplace}
+                  </p>
+                  <div className="border-t pt-2 mt-2">
+                    <p className="text-sm font-medium">Cobertura ({absence.coverage_type}):</p>
+                    <p className="text-sm">
+                      {absence.coverage_name} (CPF: {absence.coverage_cpf})
+                    </p>
+                    {absence.coverage_type === "prestador" && (
+                      <p className="text-sm">
+                        <strong>Valor:</strong> R$ {absence.coverage_value?.toFixed(2)}
+                      </p>
+                    )}
+                  </div>
+                  {absence.status === "pending" && (
+                    <div className="mt-4">
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => document.getElementById(`file-${absence.id}`)?.click()}
+                      >
+                        <UploadCloud className="mr-2 h-4 w-4" />
+                        Enviar Justificativa
+                      </Button>
+                      <input
+                        id={`file-${absence.id}`}
+                        type="file"
+                        className="hidden"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => handleFileUpload(e, absence.id)}
+                      />
+                    </div>
+                  )}
+                  {absence.justification_file_url && (
+                    <div className="mt-2">
+                      <a
+                        href={absence.justification_file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-primary hover:underline"
+                      >
+                        Ver justificativa
+                      </a>
+                    </div>
                   )}
                 </div>
-                {absence.status === "pending" && (
-                  <div className="mt-4">
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => document.getElementById(`file-${absence.id}`)?.click()}
-                    >
-                      <UploadCloud className="mr-2 h-4 w-4" />
-                      Enviar Justificativa
-                    </Button>
-                    <input
-                      id={`file-${absence.id}`}
-                      type="file"
-                      className="hidden"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      onChange={(e) => handleFileUpload(e, absence.id)}
-                    />
-                  </div>
-                )}
-                {absence.justification_file_url && (
-                  <div className="mt-2">
-                    <a
-                      href={absence.justification_file_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-primary hover:underline"
-                    >
-                      Ver justificativa
-                    </a>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
-    </div>
+    </ScrollArea>
   );
 };
 
