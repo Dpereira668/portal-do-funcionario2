@@ -52,7 +52,7 @@ const DashboardLayout = () => {
                     <SidebarMenuItem key={item.path}>
                       <SidebarMenuButton
                         asChild
-                        active={location.pathname === item.path}
+                        isActive={location.pathname === item.path}
                       >
                         <Link to={item.path}>
                           <item.icon />
