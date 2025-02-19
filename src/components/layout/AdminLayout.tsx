@@ -7,7 +7,7 @@ import {
   SidebarGroupLabel,
   SidebarProvider,
 } from "@/components/ui/sidebar";
-import { Bell, Home, Users } from "lucide-react";
+import { Bell, Home, Users, Calendar, UserX } from "lucide-react";
 import { Outlet } from "react-router-dom";
 import SidebarMenuList, { MenuItem } from "../ui/SidebarMenuList";
 
@@ -27,6 +27,16 @@ const AdminLayout = () => {
       title: "Gestão de Funcionários",
       icon: Users,
       path: "/admin/gestao-funcionarios",
+    },
+    {
+      title: "Gestão de Férias",
+      icon: Calendar,
+      path: "/admin/gestao-ferias",
+    },
+    {
+      title: "Lançamento de Faltas",
+      icon: UserX,
+      path: "/admin/lancamento-faltas",
     },
   ];
 

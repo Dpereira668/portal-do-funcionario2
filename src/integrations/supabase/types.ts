@@ -9,6 +9,63 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      absences: {
+        Row: {
+          absence_date: string
+          coverage_bank_info: Json | null
+          coverage_cpf: string
+          coverage_name: string
+          coverage_type: string
+          coverage_value: number | null
+          created_at: string
+          employee_cpf: string
+          employee_name: string
+          id: string
+          justification: string | null
+          justification_file_url: string | null
+          position_title: string
+          status: string | null
+          updated_at: string
+          workplace: string
+        }
+        Insert: {
+          absence_date: string
+          coverage_bank_info?: Json | null
+          coverage_cpf: string
+          coverage_name: string
+          coverage_type: string
+          coverage_value?: number | null
+          created_at?: string
+          employee_cpf: string
+          employee_name: string
+          id?: string
+          justification?: string | null
+          justification_file_url?: string | null
+          position_title: string
+          status?: string | null
+          updated_at?: string
+          workplace: string
+        }
+        Update: {
+          absence_date?: string
+          coverage_bank_info?: Json | null
+          coverage_cpf?: string
+          coverage_name?: string
+          coverage_type?: string
+          coverage_value?: number | null
+          created_at?: string
+          employee_cpf?: string
+          employee_name?: string
+          id?: string
+          justification?: string | null
+          justification_file_url?: string | null
+          position_title?: string
+          status?: string | null
+          updated_at?: string
+          workplace?: string
+        }
+        Relationships: []
+      }
       admin_profiles: {
         Row: {
           created_at: string
