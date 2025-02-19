@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import { useQuery } from "@tanstack/react-query";
-import { Download, FileDown, Plus } from "lucide-react";
+import { Download, FileDown, Plus, UploadCloud } from "lucide-react";
 import { useState } from "react";
 
 interface BankInfo {
@@ -349,7 +348,7 @@ const LancamentoFaltas = () => {
                       className="w-full"
                       onClick={() => document.getElementById(`file-${absence.id}`)?.click()}
                     >
-                      <Upload className="mr-2 h-4 w-4" />
+                      <UploadCloud className="mr-2 h-4 w-4" />
                       Enviar Justificativa
                     </Button>
                     <input
