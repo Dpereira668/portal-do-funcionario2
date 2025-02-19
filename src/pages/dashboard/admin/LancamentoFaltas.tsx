@@ -1,23 +1,17 @@
 
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import { useQuery } from "@tanstack/react-query";
-import { FileDown, Plus } from "lucide-react";
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { AbsenceCard } from "./components/AbsenceCard";
-import { AbsenceForm } from "./components/AbsenceForm";
+import { AbsenceHeader } from "./components/AbsenceHeader";
+import { AbsenceList } from "./components/AbsenceList";
 import { type Absence } from "./types/absences";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { 
+  downloadCSV, 
+  formatProviderReport, 
+  formatMonthlyReport 
+} from "./utils/exportUtils";
 
 const LancamentoFaltas = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -84,56 +78,9 @@ const LancamentoFaltas = () => {
         .eq("coverage_type", "prestador");
 
       if (error) throw error;
-
-      const headers = [
-        "Data da Falta",
-        "Nome do Funcionário",
-        "CPF do Funcionário",
-        "Função",
-        "Posto",
-        "Nome do Prestador",
-        "CPF do Prestador",
-        "Valor",
-        "Banco",
-        "Agência",
-        "Conta",
-        "Tipo de Conta",
-        "PIX",
-        "Status",
-      ];
-
-      const csv = [
-        headers.join(","),
-        ...data.map(absence => {
-          const bankInfo = absence.coverage_bank_info;
-          const formattedDate = format(new Date(absence.absence_date), "dd/MM/yyyy");
-          return [
-            formattedDate,
-            absence.employee_name,
-            absence.employee_cpf,
-            absence.position_title,
-            absence.workplace,
-            absence.coverage_name,
-            absence.coverage_cpf,
-            absence.coverage_value,
-            bankInfo?.bank || '',
-            bankInfo?.agency || '',
-            bankInfo?.account || '',
-            bankInfo?.account_type || '',
-            bankInfo?.pix || '',
-            absence.status,
-          ].join(",");
-        })
-      ].join("\n");
-
-      const blob = new Blob([csv], { type: "text/csv" });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      const currentDate = format(new Date(), "dd-MM-yyyy", { locale: ptBR });
-      a.href = url;
-      a.download = `prestadores-${currentDate}.csv`;
-      a.click();
-      window.URL.revokeObjectURL(url);
+      
+      const csv = formatProviderReport(data);
+      downloadCSV(csv, "prestadores");
     } catch (error: any) {
       toast({
         title: "Erro ao baixar relatório",
@@ -152,46 +99,8 @@ const LancamentoFaltas = () => {
 
       if (error) throw error;
 
-      const headers = [
-        "Data da Falta",
-        "Nome do Funcionário",
-        "CPF do Funcionário",
-        "Função",
-        "Posto",
-        "Tipo de Cobertura",
-        "Nome do Cobertor",
-        "CPF do Cobertor",
-        "Status",
-        "Justificado"
-      ];
-
-      const csv = [
-        headers.join(","),
-        ...data.map(absence => {
-          const formattedDate = format(new Date(absence.absence_date), "dd/MM/yyyy");
-          return [
-            formattedDate,
-            absence.employee_name,
-            absence.employee_cpf,
-            absence.position_title,
-            absence.workplace,
-            absence.coverage_type === "standby" ? "Standby" : "Prestador",
-            absence.coverage_name,
-            absence.coverage_cpf,
-            absence.status,
-            absence.justification_file_url ? "Sim" : "Não"
-          ].join(",");
-        })
-      ].join("\n");
-
-      const blob = new Blob([csv], { type: "text/csv" });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      const currentDate = format(new Date(), "dd-MM-yyyy", { locale: ptBR });
-      a.href = url;
-      a.download = `faltas-${currentDate}.csv`;
-      a.click();
-      window.URL.revokeObjectURL(url);
+      const csv = formatMonthlyReport(data);
+      downloadCSV(csv, "faltas");
     } catch (error: any) {
       toast({
         title: "Erro ao baixar relatório",
@@ -252,56 +161,19 @@ const LancamentoFaltas = () => {
     <div className="h-[calc(100vh-2rem)] flex flex-col overflow-hidden">
       <ScrollArea className="flex-1">
         <div className="p-8 space-y-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-3xl font-bold text-primary">
-                Lançamento de Faltas
-              </h2>
-              <p className="text-muted-foreground">
-                Gerencie as faltas e coberturas dos funcionários
-              </p>
-            </div>
-            <div className="flex gap-4">
-              <Button variant="outline" onClick={handleDownloadMonthlyReport}>
-                <FileDown className="mr-2 h-4 w-4" />
-                Relatório de Faltas
-              </Button>
-              <Button variant="outline" onClick={handleDownloadReport}>
-                <FileDown className="mr-2 h-4 w-4" />
-                Relatório de Prestadores
-              </Button>
-              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Lançar Falta
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl h-[90vh]">
-                  <DialogHeader>
-                    <DialogTitle>Lançar Falta</DialogTitle>
-                  </DialogHeader>
-                  <ScrollArea className="h-full pr-4">
-                    <AbsenceForm
-                      coverageType={coverageType}
-                      onCoverageTypeChange={setCoverageType}
-                      onSubmit={handleAddAbsence}
-                    />
-                  </ScrollArea>
-                </DialogContent>
-              </Dialog>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {absences?.map((absence) => (
-              <AbsenceCard
-                key={absence.id}
-                absence={absence}
-                onFileUpload={handleFileUpload}
-              />
-            ))}
-          </div>
+          <AbsenceHeader
+            isAddDialogOpen={isAddDialogOpen}
+            setIsAddDialogOpen={setIsAddDialogOpen}
+            coverageType={coverageType}
+            onCoverageTypeChange={setCoverageType}
+            onAddAbsence={handleAddAbsence}
+            onDownloadMonthlyReport={handleDownloadMonthlyReport}
+            onDownloadProviderReport={handleDownloadReport}
+          />
+          <AbsenceList
+            absences={absences}
+            onFileUpload={handleFileUpload}
+          />
         </div>
       </ScrollArea>
     </div>
@@ -309,4 +181,3 @@ const LancamentoFaltas = () => {
 };
 
 export default LancamentoFaltas;
-
