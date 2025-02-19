@@ -5,18 +5,14 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
   SidebarProvider,
 } from "@/components/ui/sidebar";
 import { Bell, User } from "lucide-react";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
+import SidebarMenuList, { MenuItem } from "../ui/SidebarMenuList";
 
 const FuncionarioLayout = () => {
-  const location = useLocation();
-
-  const menuItems = [
+  const menuItems: MenuItem[] = [
     {
       title: "Minhas Solicitações",
       icon: Bell,
@@ -37,26 +33,12 @@ const FuncionarioLayout = () => {
             <SidebarGroup>
               <SidebarGroupLabel>Menu</SidebarGroupLabel>
               <SidebarGroupContent>
-                <SidebarMenu>
-                  {menuItems.map((item) => (
-                    <SidebarMenuItem key={item.path}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={location.pathname === item.path}
-                      >
-                        <Link to={item.path}>
-                          <item.icon />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
+                <SidebarMenuList items={menuItems} label="Menu do Funcionário" />
               </SidebarGroupContent>
             </SidebarGroup>
           </SidebarContent>
         </Sidebar>
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto animate-fade-in">
           <Outlet />
         </main>
       </div>
