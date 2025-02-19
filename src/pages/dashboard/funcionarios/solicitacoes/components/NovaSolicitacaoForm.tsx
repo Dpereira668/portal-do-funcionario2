@@ -11,7 +11,7 @@ interface NovaSolicitacaoFormProps {
 }
 
 const NovaSolicitacaoForm = ({ onSuccess, tipoInicial }: NovaSolicitacaoFormProps) => {
-  const { novaSolicitacao, loading, handleChange } = useSolicitacaoForm({
+  const { novaSolicitacao, loading, handleChange, handleSubmit } = useSolicitacaoForm({
     onSuccess,
     tipoInicial,
   });
