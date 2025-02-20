@@ -1,5 +1,4 @@
 
-import { useQuery } from "@tanstack/react-query";
 import {
   Card,
   CardContent,
@@ -8,196 +7,163 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Bell, Home, Users, Calendar, UserX, AlertTriangle } from "lucide-react";
-import { supabase } from "@/lib/supabase";
-import { Link } from "react-router-dom";
+import {
+  Users,
+  CalendarRange,
+  UserX,
+  AlertTriangle,
+  Bell,
+  FileText,
+  UserCog,
+  Building2,
+  Shirt,
+  BadgeHelp,
+  ScrollText,
+  PiggyBank,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const DashboardAdmin = () => {
-  const { data: pendingRequests } = useQuery({
-    queryKey: ['pending_requests'],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('requests')
-        .select('*')
-        .eq('status', 'pendente')
-        .order('created_at', { ascending: false });
-      return data || [];
-    },
-  });
+  const navigate = useNavigate();
 
-  const { data: activeVacations } = useQuery({
-    queryKey: ['active_vacations'],
-    queryFn: async () => {
-      const today = new Date().toISOString();
-      const { data } = await supabase
-        .from('vacation_schedules')
-        .select('*')
-        .lte('start_date', today)
-        .gte('end_date', today);
-      return data || [];
+  const menuItems = [
+    {
+      title: "Gestão de Funcionários",
+      description: "Cadastro, edição e visualização de funcionários",
+      icon: Users,
+      path: "/admin/gestao-funcionarios",
+      color: "bg-blue-50 hover:bg-blue-100",
+      iconColor: "text-blue-600",
     },
-  });
-
-  const { data: absences } = useQuery({
-    queryKey: ['absences'],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('absences')
-        .select('*')
-        .eq('status', 'pending')
-        .order('absence_date', { ascending: false });
-      return data || [];
+    {
+      title: "Gestão de Férias",
+      description: "Planejamento e aprovação de férias",
+      icon: CalendarRange,
+      path: "/admin/gestao-ferias",
+      color: "bg-green-50 hover:bg-green-100",
+      iconColor: "text-green-600",
     },
-  });
+    {
+      title: "Lançamento de Faltas",
+      description: "Registro e controle de ausências",
+      icon: UserX,
+      path: "/admin/lancamento-faltas",
+      color: "bg-purple-50 hover:bg-purple-100",
+      iconColor: "text-purple-600",
+    },
+    {
+      title: "Punições",
+      description: "Advertências e suspensões",
+      icon: AlertTriangle,
+      path: "/admin/punicoes",
+      color: "bg-red-50 hover:bg-red-100",
+      iconColor: "text-red-600",
+    },
+    {
+      title: "Solicitações",
+      description: "Aprovação de requerimentos",
+      icon: Bell,
+      path: "/admin/solicitacoes",
+      color: "bg-amber-50 hover:bg-amber-100",
+      iconColor: "text-amber-600",
+    },
+    {
+      title: "Documentos",
+      description: "Emissão de documentos oficiais",
+      icon: FileText,
+      path: "/admin/documentos",
+      color: "bg-indigo-50 hover:bg-indigo-100",
+      iconColor: "text-indigo-600",
+    },
+    {
+      title: "Cargos e Funções",
+      description: "Gestão de cargos e atribuições",
+      icon: UserCog,
+      path: "/admin/cargos",
+      color: "bg-cyan-50 hover:bg-cyan-100",
+      iconColor: "text-cyan-600",
+    },
+    {
+      title: "Unidades",
+      description: "Gestão de locais de trabalho",
+      icon: Building2,
+      path: "/admin/unidades",
+      color: "bg-emerald-50 hover:bg-emerald-100",
+      iconColor: "text-emerald-600",
+    },
+    {
+      title: "Uniformes",
+      description: "Controle de uniformes e EPIs",
+      icon: Shirt,
+      path: "/admin/uniformes",
+      color: "bg-violet-50 hover:bg-violet-100",
+      iconColor: "text-violet-600",
+    },
+    {
+      title: "Dúvidas Frequentes",
+      description: "Central de ajuda e suporte",
+      icon: BadgeHelp,
+      path: "/admin/faq",
+      color: "bg-rose-50 hover:bg-rose-100",
+      iconColor: "text-rose-600",
+    },
+    {
+      title: "Relatórios",
+      description: "Geração de relatórios gerenciais",
+      icon: ScrollText,
+      path: "/admin/relatorios",
+      color: "bg-teal-50 hover:bg-teal-100",
+      iconColor: "text-teal-600",
+    },
+    {
+      title: "Financeiro",
+      description: "Adiantamentos e reembolsos",
+      icon: PiggyBank,
+      path: "/admin/financeiro",
+      color: "bg-orange-50 hover:bg-orange-100",
+      iconColor: "text-orange-600",
+    },
+  ];
 
   return (
-    <div className="h-full p-8 bg-gradient-to-br from-primary/5 to-secondary/5">
-      <div className="space-y-8">
-        <div>
-          <h2 className="text-3xl font-bold text-primary">Dashboard Administrativo</h2>
-          <p className="text-muted-foreground">
-            Gerencie faltas, férias e solicitações dos funcionários
-          </p>
-        </div>
+    <div className="p-8 space-y-6 animate-fade-in">
+      <div>
+        <h2 className="text-3xl font-bold text-primary">
+          Painel Administrativo
+        </h2>
+        <p className="text-muted-foreground">
+          Acesse todas as funcionalidades administrativas do sistema
+        </p>
+      </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Férias Ativas
-              </CardTitle>
-              <Calendar className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{activeVacations?.length || "0"}</div>
-              <p className="text-sm text-muted-foreground">
-                Funcionários em férias
-              </p>
-              <Button asChild className="w-full mt-4" variant="outline">
-                <Link to="/admin/gestao-ferias">Gerenciar Férias</Link>
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Faltas Pendentes
-              </CardTitle>
-              <UserX className="h-4 w-4 text-red-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{absences?.length || "0"}</div>
-              <p className="text-sm text-muted-foreground">
-                Faltas para análise
-              </p>
-              <Button asChild className="w-full mt-4" variant="outline">
-                <Link to="/admin/lancamento-faltas">Gerenciar Faltas</Link>
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Solicitações Pendentes
-              </CardTitle>
-              <Bell className="h-4 w-4 text-yellow-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{pendingRequests?.length || "0"}</div>
-              <p className="text-sm text-muted-foreground">
-                Aguardando aprovação
-              </p>
-              <Button asChild className="w-full mt-4" variant="outline">
-                <Link to="/admin/solicitacoes">Ver Solicitações</Link>
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Gestão de Funcionários
-              </CardTitle>
-              <Users className="h-4 w-4 text-purple-600" />
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                Gerenciar funcionários
-              </p>
-              <Button asChild className="w-full" variant="outline">
-                <Link to="/admin/gestao-funcionarios">Ver Funcionários</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card>
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {menuItems.map((item) => (
+          <Card 
+            key={item.title}
+            className={`group cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${item.color} border-none`}
+            onClick={() => navigate(item.path)}
+          >
             <CardHeader>
-              <CardTitle>Funcionários em Férias</CardTitle>
-              <CardDescription>
-                Funcionários atualmente em período de férias
-              </CardDescription>
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-white/50 rounded-lg group-hover:bg-white/80 transition-colors">
+                  <item.icon className={`h-5 w-5 ${item.iconColor}`} />
+                </div>
+                <CardTitle className="text-lg">{item.title}</CardTitle>
+              </div>
             </CardHeader>
             <CardContent>
-              {activeVacations?.slice(0, 5).map((vacation: any) => (
-                <div
-                  key={vacation.id}
-                  className="flex items-center justify-between py-2 border-b last:border-0"
-                >
-                  <div>
-                    <p className="font-medium">{vacation.employee_name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(vacation.start_date).toLocaleDateString()} - {new Date(vacation.end_date).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <Button variant="ghost" asChild>
-                    <Link to={`/admin/gestao-ferias`}>Ver</Link>
-                  </Button>
-                </div>
-              ))}
-              {(!activeVacations || activeVacations.length === 0) && (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  Nenhum funcionário em férias
-                </p>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Últimas Faltas</CardTitle>
-              <CardDescription>
-                Faltas mais recentes registradas no sistema
+              <CardDescription className="text-gray-600">
+                {item.description}
               </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {absences?.slice(0, 5).map((absence: any) => (
-                <div
-                  key={absence.id}
-                  className="flex items-center justify-between py-2 border-b last:border-0"
-                >
-                  <div>
-                    <p className="font-medium">{absence.employee_name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(absence.absence_date).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <Button variant="ghost" asChild>
-                    <Link to={`/admin/lancamento-faltas`}>Ver</Link>
-                  </Button>
-                </div>
-              ))}
-              {(!absences || absences.length === 0) && (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  Nenhuma falta registrada
-                </p>
-              )}
+              <Button 
+                variant="ghost" 
+                className="w-full mt-4 bg-white/50 hover:bg-white/80 transition-colors"
+              >
+                Acessar
+              </Button>
             </CardContent>
           </Card>
-        </div>
+        ))}
       </div>
     </div>
   );
