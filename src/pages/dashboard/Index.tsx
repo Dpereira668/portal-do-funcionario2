@@ -1,4 +1,5 @@
 
+import { useQuery } from "@tanstack/react-query";
 import {
   Card,
   CardContent,
@@ -6,33 +7,78 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Bell, Calendar, User, Users, AlertTriangle } from "lucide-react";
+import { Bell, Calendar, AlertTriangle, Shirt } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
+import { format } from "date-fns";
 
 const DashboardIndex = () => {
+  const { user } = useAuth();
+
+  const { data: requests } = useQuery({
+    queryKey: ['requests', user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('requests')
+        .select('*')
+        .eq('user_id', user?.id)
+        .eq('status', 'pendente')
+        .order('created_at', { ascending: false });
+      return data || [];
+    },
+  });
+
+  const { data: vacations } = useQuery({
+    queryKey: ['vacation_schedules', user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('vacation_schedules')
+        .select('*')
+        .eq('employee_cpf', user?.id)
+        .gte('start_date', new Date().toISOString())
+        .order('start_date', { ascending: true })
+        .limit(1);
+      return data;
+    },
+  });
+
+  const { data: punishments } = useQuery({
+    queryKey: ['punishments', user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('punishments')
+        .select('*')
+        .eq('employee_id', user?.id)
+        .eq('status', 'ativo')
+        .order('created_at', { ascending: false });
+      return data || [];
+    },
+  });
+
   const stats = [
     {
       title: "Solicitações Pendentes",
-      value: "12",
+      value: requests?.length || "0",
       icon: <Bell className="h-4 w-4 text-muted-foreground" />,
       description: "Aguardando aprovação",
     },
     {
-      title: "Funcionários",
-      value: "48",
-      icon: <Users className="h-4 w-4 text-muted-foreground" />,
-      description: "Ativos no sistema",
+      title: "Punições Ativas",
+      value: punishments?.length || "0",
+      icon: <AlertTriangle className="h-4 w-4 text-muted-foreground" />,
+      description: "Advertências e Suspensões",
     },
     {
       title: "Férias Agendadas",
-      value: "8",
+      value: vacations?.length ? format(new Date(vacations[0].start_date), "dd/MM/yyyy") : "Não agendado",
       icon: <Calendar className="h-4 w-4 text-muted-foreground" />,
-      description: "Próximos 30 dias",
+      description: vacations?.length ? `${vacations[0].observation || "Férias confirmadas"}` : "Nenhuma férias agendada",
     },
     {
-      title: "Punições Ativas",
-      value: "3",
-      icon: <AlertTriangle className="h-4 w-4 text-muted-foreground" />,
-      description: "Advertências e Suspensões",
+      title: "Uniformes Solicitados",
+      value: requests?.filter(r => r.type === 'uniforme').length || "0",
+      icon: <Shirt className="h-4 w-4 text-muted-foreground" />,
+      description: "Pedidos em andamento",
     },
   ];
 
