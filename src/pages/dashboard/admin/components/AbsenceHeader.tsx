@@ -10,7 +10,6 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { FileDown, Plus } from "lucide-react";
 import { AbsenceForm } from "./AbsenceForm";
-import { type Absence } from "../types/absences";
 
 interface AbsenceHeaderProps {
   isAddDialogOpen: boolean;
@@ -45,10 +44,6 @@ export const AbsenceHeader = ({
         <Button variant="outline" onClick={onDownloadMonthlyReport}>
           <FileDown className="mr-2 h-4 w-4" />
           Relatório de Faltas
-        </Button>
-        <Button variant="outline" onClick={onDownloadProviderReport}>
-          <FileDown className="mr-2 h-4 w-4" />
-          Relatório de Prestadores
         </Button>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
