@@ -9,13 +9,13 @@ import FuncionarioLayout from "./components/layout/FuncionarioLayout";
 import SolicitacoesIndex from "./pages/dashboard/solicitacoes/Index";
 import GestaoFuncionarios from "./pages/dashboard/admin/GestaoFuncionarios";
 import LancamentoFaltas from "./pages/dashboard/admin/LancamentoFaltas";
+import UniformesIndex from "./pages/dashboard/admin/uniformes/Index";
 import SolicitacoesDoFuncionario from "./pages/dashboard/funcionarios/solicitacoes/Index";
 import Login from "./pages/auth/Login";
 import Cadastro from "./pages/auth/Cadastro";
 import PrivateRoute from "./components/PrivateRoute";
 import { AuthProvider } from "./contexts/AuthContext";
 
-// Criar uma nova instância do QueryClient fora do componente
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -44,6 +44,7 @@ const App = () => (
               <Route path="solicitacoes" element={<SolicitacoesIndex />} />
               <Route path="gestao-funcionarios" element={<GestaoFuncionarios />} />
               <Route path="lancamento-faltas" element={<LancamentoFaltas />} />
+              <Route path="uniformes" element={<UniformesIndex />} />
             </Route>
 
             {/* Rotas de Funcionário */}
