@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Bell, Home, Users, Calendar, UserX } from "lucide-react";
+import { Bell, Home, Users, Calendar, UserX, AlertTriangle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Link } from "react-router-dom";
 
