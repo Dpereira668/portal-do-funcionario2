@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import {
   Card,
@@ -7,14 +6,25 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Bell, Calendar, AlertTriangle, Shirt, FileText, PiggyBank } from "lucide-react";
+import { Bell, Calendar, AlertTriangle, Shirt, FileText, PiggyBank, Plus } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
 import { getIconForType, getStatusColor } from "./funcionarios/solicitacoes/utils/solicitacoesUtils";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useState } from "react";
+import NovaSolicitacaoForm from "./funcionarios/solicitacoes/components/NovaSolicitacaoForm";
 
 const DashboardIndex = () => {
   const { user } = useAuth();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const { data: requests } = useQuery({
     queryKey: ['requests', user?.id],
@@ -84,11 +94,39 @@ const DashboardIndex = () => {
     },
   ];
 
+  const handleSolicitacaoSuccess = () => {
+    setIsDialogOpen(false);
+  };
+
   return (
     <div className="h-full p-4 md:p-8 bg-gradient-to-br from-primary/5 to-secondary/5">
       <div className="space-y-6">
-        <h2 className="text-2xl md:text-3xl font-bold text-primary">Dashboard</h2>
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl md:text-3xl font-bold text-primary">Dashboard</h2>
+          <Button 
+            onClick={() => setIsDialogOpen(true)}
+            className="bg-[#8B5CF6] hover:bg-[#7C3AED] transition-colors"
+          >
+            <Shirt className="mr-2 h-4 w-4" />
+            Solicitar Uniforme
+          </Button>
+        </div>
         
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Nova Solicitação de Uniforme</DialogTitle>
+              <DialogDescription>
+                Preencha os dados para solicitar seu uniforme
+              </DialogDescription>
+            </DialogHeader>
+            <NovaSolicitacaoForm 
+              tipoInicial="uniforme"
+              onSuccess={handleSolicitacaoSuccess} 
+            />
+          </DialogContent>
+        </Dialog>
+
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat, index) => (
             <Card key={index} className="hover:shadow-lg transition-shadow">
