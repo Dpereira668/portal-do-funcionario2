@@ -1,12 +1,11 @@
 
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import AdminLayout from "./components/layout/AdminLayout";
 import FuncionarioLayout from "./components/layout/FuncionarioLayout";
-import DashboardIndex from "./pages/dashboard/Index";
 import SolicitacoesIndex from "./pages/dashboard/solicitacoes/Index";
 import GestaoFuncionarios from "./pages/dashboard/admin/GestaoFuncionarios";
 import LancamentoFaltas from "./pages/dashboard/admin/LancamentoFaltas";
@@ -41,7 +40,7 @@ const App = () => (
           <Route element={<PrivateRoute />}>
             {/* Rotas de Admin */}
             <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<DashboardIndex />} />
+              <Route index element={<Navigate to="/admin/solicitacoes" replace />} />
               <Route path="solicitacoes" element={<SolicitacoesIndex />} />
               <Route path="gestao-funcionarios" element={<GestaoFuncionarios />} />
               <Route path="lancamento-faltas" element={<LancamentoFaltas />} />
@@ -49,7 +48,7 @@ const App = () => (
 
             {/* Rotas de Funcionário */}
             <Route path="/funcionario" element={<FuncionarioLayout />}>
-              <Route index element={<DashboardIndex />} />
+              <Route index element={<Navigate to="/funcionario/solicitacoes" replace />} />
               <Route path="solicitacoes" element={<SolicitacoesDoFuncionario />} />
             </Route>
           </Route>
