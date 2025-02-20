@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { AlertTriangle, Bell, Calendar, ScrollText, UserX } from "lucide-react";
+import { Bell, Calendar, ScrollText, UserX } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
@@ -79,13 +79,13 @@ const FuncionariosIndex = () => {
       link: "Ver todas",
     },
     {
-      title: "Punições Ativas",
-      value: punishments?.length || 0,
-      description: "Advertências e suspensões",
-      icon: <AlertTriangle className="h-5 w-5 text-red-500" />,
-      onClick: () => navigate("/funcionario/punicoes"),
-      color: "bg-red-50",
-      link: "Detalhes",
+      title: "Férias Agendadas",
+      value: vacations?.length ? format(new Date(vacations[0].start_date), "dd/MM/yyyy") : "Não agendado",
+      description: vacations?.length ? `${vacations[0].observation || "Férias agendadas"}` : "Nenhuma férias agendada",
+      icon: <Calendar className="h-5 w-5 text-blue-500" />,
+      onClick: () => navigate("/funcionario/ferias"),
+      color: "bg-blue-50",
+      link: "Ver agenda",
     },
     {
       title: "Faltas Registradas",
@@ -96,21 +96,12 @@ const FuncionariosIndex = () => {
       color: "bg-purple-50",
       link: "Ver histórico",
     },
-    {
-      title: "Próximas Férias",
-      value: vacations?.length ? format(new Date(vacations[0].start_date), "dd/MM/yyyy") : "Não agendado",
-      description: vacations?.length ? `${vacations[0].observation || "Férias agendadas"}` : "Nenhuma férias agendada",
-      icon: <Calendar className="h-5 w-5 text-blue-500" />,
-      onClick: () => navigate("/funcionario/ferias"),
-      color: "bg-blue-50",
-      link: "Ver agenda",
-    },
   ];
 
   const quickActions = [
     {
       title: "Nova Solicitação",
-      description: "Uniformes, documentos e outros",
+      description: "Documentos e outros",
       icon: <ScrollText className="h-5 w-5" />,
       onClick: () => navigate("/funcionario/solicitacoes"),
       colorClass: "bg-primary text-primary-foreground hover:bg-primary/90",
@@ -133,7 +124,7 @@ const FuncionariosIndex = () => {
         </p>
       </div>
 
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {cards.map((card, index) => (
           <Card 
             key={index} 
