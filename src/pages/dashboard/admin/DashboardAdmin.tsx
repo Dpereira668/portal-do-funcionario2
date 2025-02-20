@@ -1,4 +1,5 @@
 
+import { useQuery } from "@tanstack/react-query";
 import {
   Card,
   CardContent,
@@ -6,242 +7,195 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Bell, Calendar, UserPlus, User } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Link } from "react-router-dom";
-import { Bell, Calendar, Edit, FileText, UserCircle } from "lucide-react";
-import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-
-interface AdminProfile {
-  id: string;
-  name: string;
-  email: string;
-  function: string;
-  phone: string;
-  notes: string;
-}
-
-interface VacationSchedule {
-  id: string;
-  employee_name: string;
-  employee_cpf: string;
-  position_title: string;
-  workplace: string;
-  start_date: string;
-  end_date: string;
-  observation: string;
-}
 
 const DashboardAdmin = () => {
-  const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null);
-  const [editingProfile, setEditingProfile] = useState(false);
-  const [notes, setNotes] = useState("");
-
   const { data: pendingRequests } = useQuery({
-    queryKey: ["pending-requests"],
+    queryKey: ['pending_requests'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("requests")
-        .select(`
-          *,
-          profiles(name, cpf, positions(title), workplace)
-        `)
-        .eq("status", "pendente");
-      if (error) throw error;
-      return data;
+      const { data } = await supabase
+        .from('requests')
+        .select('*')
+        .eq('status', 'pendente')
+        .order('created_at', { ascending: false });
+      return data || [];
     },
   });
 
-  const { data: vacationSchedules } = useQuery({
-    queryKey: ["vacation-schedules"],
+  const { data: registrationRequests } = useQuery({
+    queryKey: ['registration_requests'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("vacation_schedules")
-        .select(`
-          *,
-          profiles(name, cpf, positions(title), workplace)
-        `);
-      if (error) throw error;
-      return data;
+      const { data } = await supabase
+        .from('registration_requests')
+        .select('*')
+        .eq('status', 'pending');
+      return data || [];
     },
   });
 
-  const updateAdminProfile = async (profile: Partial<AdminProfile>) => {
-    const { data, error } = await supabase
-      .from("admin_profiles")
-      .update(profile)
-      .eq("id", adminProfile?.id)
-      .select()
-      .single();
-
-    if (error) throw error;
-    setAdminProfile(data);
-    setEditingProfile(false);
-  };
+  const { data: vacationRequests } = useQuery({
+    queryKey: ['vacation_schedules'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('vacation_schedules')
+        .select('*')
+        .gte('start_date', new Date().toISOString())
+        .order('start_date', { ascending: true });
+      return data || [];
+    },
+  });
 
   return (
-    <div className="p-8 space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Card de Solicitações Pendentes */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Bell className="mr-2 h-5 w-5" />
-              Solicitações Pendentes
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {pendingRequests?.map((request) => (
-                <Link
-                  key={request.id}
-                  to={`/admin/solicitacoes/${request.id}`}
-                  className="block p-4 border rounded-lg hover:bg-accent"
-                >
-                  <p className="font-medium">{request.profiles?.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {request.type === "ferias"
-                      ? "Solicitação de Férias"
-                      : request.type === "uniforme"
-                      ? "Solicitação de Uniforme"
-                      : "Outras Solicitações"}
-                  </p>
-                </Link>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+    <div className="h-full p-8 bg-gradient-to-br from-primary/5 to-secondary/5">
+      <div className="space-y-8">
+        <div>
+          <h2 className="text-3xl font-bold text-primary">Dashboard Administrativo</h2>
+          <p className="text-muted-foreground">
+            Gerencie solicitações, cadastros e férias dos funcionários
+          </p>
+        </div>
 
-        {/* Card de Férias Agendadas */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Calendar className="mr-2 h-5 w-5" />
-              Férias Agendadas
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {vacationSchedules?.map((schedule) => (
-                <div key={schedule.id} className="p-4 border rounded-lg">
-                  <p className="font-medium">{schedule.profiles?.name}</p>
-                  <p className="text-sm">
-                    {new Date(schedule.start_date).toLocaleDateString()} até{" "}
-                    {new Date(schedule.end_date).toLocaleDateString()}
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    {schedule.observation}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Card de Perfil do Administrador */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center">
-                <UserCircle className="mr-2 h-5 w-5" />
-                Meu Perfil
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setEditingProfile(!editingProfile)}
-              >
-                <Edit className="h-4 w-4" />
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Solicitações Pendentes
+              </CardTitle>
+              <Bell className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{pendingRequests?.length || "0"}</div>
+              <p className="text-sm text-muted-foreground">
+                Aguardando aprovação
+              </p>
+              <Button asChild className="w-full mt-4" variant="outline">
+                <Link to="/admin/solicitacoes">Ver Solicitações</Link>
               </Button>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {editingProfile ? (
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium">Nome</label>
-                  <Input
-                    value={adminProfile?.name || ""}
-                    onChange={(e) =>
-                      setAdminProfile((prev) => ({
-                        ...prev!,
-                        name: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Email</label>
-                  <Input
-                    value={adminProfile?.email || ""}
-                    onChange={(e) =>
-                      setAdminProfile((prev) => ({
-                        ...prev!,
-                        email: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Função</label>
-                  <Input
-                    value={adminProfile?.function || ""}
-                    onChange={(e) =>
-                      setAdminProfile((prev) => ({
-                        ...prev!,
-                        function: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Telefone</label>
-                  <Input
-                    value={adminProfile?.phone || ""}
-                    onChange={(e) =>
-                      setAdminProfile((prev) => ({
-                        ...prev!,
-                        phone: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-                <Button
-                  onClick={() => updateAdminProfile(adminProfile!)}
-                  className="w-full"
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Solicitações de Cadastro
+              </CardTitle>
+              <UserPlus className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{registrationRequests?.length || "0"}</div>
+              <p className="text-sm text-muted-foreground">
+                Novos cadastros pendentes
+              </p>
+              <Button asChild className="w-full mt-4" variant="outline">
+                <Link to="/admin/gestao-funcionarios">Gerenciar Cadastros</Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Solicitações de Férias
+              </CardTitle>
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{vacationRequests?.length || "0"}</div>
+              <p className="text-sm text-muted-foreground">
+                Férias para análise
+              </p>
+              <Button asChild className="w-full mt-4" variant="outline">
+                <Link to="/admin/gestao-ferias">Gerenciar Férias</Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Perfil Administrativo
+              </CardTitle>
+              <User className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Gerencie suas informações
+              </p>
+              <Button asChild className="w-full" variant="outline">
+                <Link to="/admin/perfil">Ver Perfil</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Últimas Solicitações Pendentes</CardTitle>
+              <CardDescription>
+                Solicitações mais recentes que precisam de sua atenção
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {pendingRequests?.slice(0, 5).map((request: any) => (
+                <div
+                  key={request.id}
+                  className="flex items-center justify-between py-2 border-b last:border-0"
                 >
-                  Salvar
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <p>
-                  <strong>Nome:</strong> {adminProfile?.name}
+                  <div>
+                    <p className="font-medium">{request.type}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {new Date(request.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <Button variant="ghost" asChild>
+                    <Link to={`/admin/solicitacoes`}>Ver</Link>
+                  </Button>
+                </div>
+              ))}
+              {(!pendingRequests || pendingRequests.length === 0) && (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  Nenhuma solicitação pendente
                 </p>
-                <p>
-                  <strong>Email:</strong> {adminProfile?.email}
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Próximas Férias</CardTitle>
+              <CardDescription>
+                Períodos de férias aprovados para os próximos dias
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {vacationRequests?.slice(0, 5).map((vacation: any) => (
+                <div
+                  key={vacation.id}
+                  className="flex items-center justify-between py-2 border-b last:border-0"
+                >
+                  <div>
+                    <p className="font-medium">{vacation.employee_name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {new Date(vacation.start_date).toLocaleDateString()} - {new Date(vacation.end_date).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <Button variant="ghost" asChild>
+                    <Link to={`/admin/gestao-ferias`}>Ver</Link>
+                  </Button>
+                </div>
+              ))}
+              {(!vacationRequests || vacationRequests.length === 0) && (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  Nenhuma férias agendada
                 </p>
-                <p>
-                  <strong>Função:</strong> {adminProfile?.function}
-                </p>
-                <p>
-                  <strong>Telefone:</strong> {adminProfile?.phone}
-                </p>
-              </div>
-            )}
-            <div className="mt-4">
-              <label className="text-sm font-medium">Bloco de Notas</label>
-              <textarea
-                className="w-full mt-2 p-2 border rounded-md min-h-[100px]"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Digite suas anotações aqui..."
-              />
-            </div>
-          </CardContent>
-        </Card>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
