@@ -37,7 +37,7 @@ export const formatRequestDetails = (request: any) => {
     case 'documento':
       return `Data: ${format(new Date(request.start_date), 'dd/MM/yyyy')}`;
     case 'adiantamento':
-      return `Valor: R$ ${request.amount}`;
+      return `Valor: R$ ${request.advance_amount}`;
     default:
       return request.notes;
   }
