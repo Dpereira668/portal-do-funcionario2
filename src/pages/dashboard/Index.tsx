@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import {
   Card,
@@ -6,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Bell, Calendar, AlertTriangle, Shirt, FileText, PiggyBank, Plus } from "lucide-react";
+import { Bell, Calendar, AlertTriangle, Shirt, FileText, Plus } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
@@ -21,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { useState } from "react";
 import NovaSolicitacaoForm from "./funcionarios/solicitacoes/components/NovaSolicitacaoForm";
+import ListaSolicitacoes from "./funcionarios/solicitacoes/components/ListaSolicitacoes";
 
 const DashboardIndex = () => {
   const { user } = useAuth();
@@ -98,6 +100,13 @@ const DashboardIndex = () => {
     setIsDialogOpen(false);
   };
 
+  const formatRequestDetails = (request: any) => {
+    if (request.type === 'uniforme') {
+      return `${request.uniform_type} - Tamanho ${request.uniform_size} - ${request.uniform_quantity} unidade(s)`;
+    }
+    return request.description || request.notes;
+  };
+
   return (
     <div className="h-full p-4 md:p-8 bg-gradient-to-br from-primary/5 to-secondary/5">
       <div className="space-y-6">
@@ -148,51 +157,23 @@ const DashboardIndex = () => {
 
         <div className="space-y-4">
           <h3 className="text-xl font-semibold text-primary">Minhas Solicitações</h3>
-          <div className="space-y-4">
-            {requests?.slice(0, 5).map((request) => (
-              <Card key={request.id} className="hover:shadow-md transition-shadow">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-primary/5 rounded-full">
-                      {getIconForType(request.type) && 
-                        <request.icon className="h-4 w-4 text-primary" />
-                      }
-                    </div>
-                    <div>
-                      <CardTitle className="text-sm font-medium capitalize">
-                        {request.type}
-                      </CardTitle>
-                      <p className="text-xs text-muted-foreground">
-                        {format(new Date(request.created_at), "dd/MM/yyyy")}
-                      </p>
-                    </div>
-                  </div>
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                      request.status
-                    )}`}
-                  >
-                    {request.status}
-                  </span>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    {request.description || request.notes}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-            {requests?.length === 0 && (
-              <Card className="bg-muted/50">
-                <CardContent className="flex flex-col items-center justify-center py-6 text-center">
-                  <FileText className="h-8 w-8 text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground">
-                    Nenhuma solicitação encontrada
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+          {requests && requests.length > 0 ? (
+            <ListaSolicitacoes
+              solicitacoes={requests.slice(0, 5)}
+              getIconForType={getIconForType}
+              getStatusColor={getStatusColor}
+              formatRequestDetails={formatRequestDetails}
+            />
+          ) : (
+            <Card className="bg-muted/50">
+              <CardContent className="flex flex-col items-center justify-center py-6 text-center">
+                <FileText className="h-8 w-8 text-muted-foreground mb-2" />
+                <p className="text-sm text-muted-foreground">
+                  Nenhuma solicitação encontrada
+                </p>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>
