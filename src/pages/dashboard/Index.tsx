@@ -19,6 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState } from "react";
 import NovaSolicitacaoForm from "./funcionarios/solicitacoes/components/NovaSolicitacaoForm";
 import ListaSolicitacoes from "./funcionarios/solicitacoes/components/ListaSolicitacoes";
@@ -136,17 +137,19 @@ const DashboardIndex = () => {
         </div>
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="max-w-[425px]">
+          <DialogContent className="max-w-[425px] max-h-[90vh]">
             <DialogHeader>
               <DialogTitle>{getTipoSolicitacaoTitle(tipoSolicitacao)}</DialogTitle>
               <DialogDescription>
                 {getTipoSolicitacaoDescription(tipoSolicitacao)}
               </DialogDescription>
             </DialogHeader>
-            <NovaSolicitacaoForm 
-              tipoInicial={tipoSolicitacao}
-              onSuccess={handleSolicitacaoSuccess} 
-            />
+            <ScrollArea className="max-h-[60vh] px-1">
+              <NovaSolicitacaoForm 
+                tipoInicial={tipoSolicitacao}
+                onSuccess={handleSolicitacaoSuccess} 
+              />
+            </ScrollArea>
           </DialogContent>
         </Dialog>
 
@@ -194,7 +197,6 @@ const DashboardIndex = () => {
           </Card>
         </div>
 
-        {/* Botões de ação móveis */}
         <div className="md:hidden grid grid-cols-2 gap-3">
           <Button
             onClick={() => handleSolicitacaoClick('ferias')}
