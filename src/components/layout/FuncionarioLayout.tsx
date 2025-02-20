@@ -15,11 +15,13 @@ const FuncionarioLayout = () => {
   const menuItems: MenuItem[] = [
     {
       title: "Minhas Solicitações",
+      description: "Visualize e gerencie suas solicitações",
       icon: Bell,
       path: "/funcionario/solicitacoes",
     },
     {
       title: "Meu Perfil",
+      description: "Gerencie suas informações pessoais",
       icon: User,
       path: "/funcionario/perfil",
     },
