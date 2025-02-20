@@ -67,35 +67,6 @@ const DashboardIndex = () => {
     },
   });
 
-  const pendingRequests = requests?.filter(r => r.status === 'pendente') || [];
-
-  const stats = [
-    {
-      title: "Solicitações Pendentes",
-      value: pendingRequests.length || "0",
-      icon: <Bell className="h-4 w-4 text-muted-foreground" />,
-      description: "Aguardando aprovação",
-    },
-    {
-      title: "Punições Ativas",
-      value: punishments?.length || "0",
-      icon: <AlertTriangle className="h-4 w-4 text-muted-foreground" />,
-      description: "Advertências e Suspensões",
-    },
-    {
-      title: "Férias Agendadas",
-      value: vacations?.length ? format(new Date(vacations[0].start_date), "dd/MM/yyyy") : "Não agendado",
-      icon: <Calendar className="h-4 w-4 text-muted-foreground" />,
-      description: vacations?.length ? `${vacations[0].observation || "Férias confirmadas"}` : "Nenhuma férias agendada",
-    },
-    {
-      title: "Uniformes Solicitados",
-      value: requests?.filter(r => r.type === 'uniforme' && r.status === 'pendente').length || "0",
-      icon: <Shirt className="h-4 w-4 text-muted-foreground" />,
-      description: "Pedidos em andamento",
-    },
-  ];
-
   const handleSolicitacaoSuccess = () => {
     setIsDialogOpen(false);
   };
@@ -107,18 +78,27 @@ const DashboardIndex = () => {
     return request.description || request.notes;
   };
 
+  const proximasFerias = vacations?.length 
+    ? `${format(new Date(vacations[0].start_date), "dd/MM/yyyy")} - ${vacations[0].observation || "Férias confirmadas"}`
+    : "Nenhuma férias agendada";
+
   return (
     <div className="h-full p-4 md:p-8 bg-gradient-to-br from-primary/5 to-secondary/5">
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl md:text-3xl font-bold text-primary">Dashboard</h2>
-          <Button 
-            onClick={() => setIsDialogOpen(true)}
-            className="bg-[#8B5CF6] hover:bg-[#7C3AED] transition-colors"
-          >
-            <Shirt className="mr-2 h-4 w-4" />
-            Solicitar Uniforme
-          </Button>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h2 className="text-2xl md:text-3xl font-bold text-primary">Minhas Solicitações</h2>
+            <p className="text-muted-foreground">Gerencie suas solicitações e acompanhe o status</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button 
+              onClick={() => setIsDialogOpen(true)}
+              className="bg-[#8B5CF6] hover:bg-[#7C3AED] transition-colors flex-1 md:flex-none"
+            >
+              <Shirt className="mr-2 h-4 w-4" />
+              Solicitar Uniforme
+            </Button>
+          </div>
         </div>
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -136,30 +116,54 @@ const DashboardIndex = () => {
           </DialogContent>
         </Dialog>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {stats.map((stat, index) => (
-            <Card key={index} className="hover:shadow-lg transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {stat.title}
-                </CardTitle>
-                {stat.icon}
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-muted-foreground">
-                  {stat.description}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Próximas Férias
+              </CardTitle>
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">{proximasFerias}</p>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Punições Ativas
+              </CardTitle>
+              <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{punishments?.length || "0"}</div>
+              <p className="text-sm text-muted-foreground">
+                {punishments?.length ? "Advertências/Suspensões ativas" : "Nenhuma punição ativa"}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Solicitações Pendentes
+              </CardTitle>
+              <Bell className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {requests?.filter(r => r.status === 'pendente').length || "0"}
+              </div>
+              <p className="text-sm text-muted-foreground">Aguardando aprovação</p>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="space-y-4">
-          <h3 className="text-xl font-semibold text-primary">Minhas Solicitações</h3>
           {requests && requests.length > 0 ? (
             <ListaSolicitacoes
-              solicitacoes={requests.slice(0, 5)}
+              solicitacoes={requests}
               getIconForType={getIconForType}
               getStatusColor={getStatusColor}
               formatRequestDetails={formatRequestDetails}
