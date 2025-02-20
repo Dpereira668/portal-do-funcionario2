@@ -12,7 +12,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
 
 const Cadastro = () => {
   const [email, setEmail] = useState("");
@@ -38,31 +37,6 @@ const Cadastro = () => {
       toast({
         title: "Senhas diferentes",
         description: "As senhas não coincidem",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Verifica se existe um perfil com o CPF informado
-    const { data: profiles, error: profileError } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("cpf", cpf)
-      .single();
-
-    if (profileError && profileError.code !== "PGRST116") {
-      toast({
-        title: "Erro na verificação",
-        description: "Erro ao verificar o CPF",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!profiles) {
-      toast({
-        title: "CPF não encontrado",
-        description: "Este CPF não está cadastrado no sistema",
         variant: "destructive",
       });
       return;
