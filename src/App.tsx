@@ -10,6 +10,8 @@ import SolicitacoesIndex from "./pages/dashboard/solicitacoes/Index";
 import GestaoFuncionarios from "./pages/dashboard/admin/GestaoFuncionarios";
 import LancamentoFaltas from "./pages/dashboard/admin/LancamentoFaltas";
 import UniformesIndex from "./pages/dashboard/admin/uniformes/Index";
+import DocumentosIndex from "./pages/dashboard/admin/documentos/Index";
+import FinanceiroIndex from "./pages/dashboard/admin/financeiro/Index";
 import SolicitacoesDoFuncionario from "./pages/dashboard/funcionarios/solicitacoes/Index";
 import Login from "./pages/auth/Login";
 import Cadastro from "./pages/auth/Cadastro";
@@ -45,6 +47,8 @@ const App = () => (
               <Route path="gestao-funcionarios" element={<GestaoFuncionarios />} />
               <Route path="lancamento-faltas" element={<LancamentoFaltas />} />
               <Route path="uniformes" element={<UniformesIndex />} />
+              <Route path="documentos" element={<DocumentosIndex />} />
+              <Route path="financeiro" element={<FinanceiroIndex />} />
             </Route>
 
             {/* Rotas de Funcionário */}

@@ -62,7 +62,7 @@ const AdminLayout = () => {
     },
     {
       title: "Documentos",
-      description: "Emissão de documentos oficiais",
+      description: "Gestão de documentos",
       icon: FileText,
       path: "/admin/documentos",
     },
@@ -92,7 +92,7 @@ const AdminLayout = () => {
     },
     {
       title: "Financeiro",
-      description: "Adiantamentos e reembolsos",
+      description: "Cobranças e pagamentos",
       icon: PiggyBank,
       path: "/admin/financeiro",
     },
