@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Bell, Home, Users, Calendar, UserX, User, AlertTriangle } from "lucide-react";
+import { Bell, Home, Users, Calendar, UserX } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Link } from "react-router-dom";
 
@@ -118,16 +118,16 @@ const DashboardAdmin = () => {
           <Card className="hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Perfil Administrativo
+                Gestão de Funcionários
               </CardTitle>
-              <User className="h-4 w-4 text-blue-600" />
+              <Users className="h-4 w-4 text-purple-600" />
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
-                Gerencie suas informações
+                Gerenciar funcionários
               </p>
               <Button asChild className="w-full" variant="outline">
-                <Link to="/admin/perfil">Ver Perfil</Link>
+                <Link to="/admin/gestao-funcionarios">Ver Funcionários</Link>
               </Button>
             </CardContent>
           </Card>
