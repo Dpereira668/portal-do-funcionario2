@@ -99,6 +99,108 @@ export type Database = {
         }
         Relationships: []
       }
+      documents: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          document_type: string
+          employee_id: string | null
+          file_url: string
+          id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          document_type: string
+          employee_id?: string | null
+          file_url: string
+          id?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          document_type?: string
+          employee_id?: string | null
+          file_url?: string
+          id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_charges: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string
+          due_date: string
+          id: string
+          notes: string | null
+          status: string
+          updated_at: string
+          workplace_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by: string
+          due_date: string
+          id?: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+          workplace_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string
+          due_date?: string
+          id?: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+          workplace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_charges_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_charges_workplace_id_fkey"
+            columns: ["workplace_id"]
+            isOneToOne: false
+            referencedRelation: "workplaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       positions: {
         Row: {
           created_at: string
@@ -324,6 +426,84 @@ export type Database = {
           uniform_type?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      uniform_movements: {
+        Row: {
+          created_at: string
+          employee_id: string | null
+          id: string
+          movement_type: string
+          notes: string | null
+          quantity: number
+          uniform_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          employee_id?: string | null
+          id?: string
+          movement_type: string
+          notes?: string | null
+          quantity: number
+          uniform_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string | null
+          id?: string
+          movement_type?: string
+          notes?: string | null
+          quantity?: number
+          uniform_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "uniform_movements_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "uniform_movements_uniform_id_fkey"
+            columns: ["uniform_id"]
+            isOneToOne: false
+            referencedRelation: "uniforms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      uniforms: {
+        Row: {
+          created_at: string
+          id: string
+          min_quantity: number
+          quantity: number
+          size: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          min_quantity?: number
+          quantity?: number
+          size: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          min_quantity?: number
+          quantity?: number
+          size?: string
+          type?: string
+          updated_at?: string
         }
         Relationships: []
       }
