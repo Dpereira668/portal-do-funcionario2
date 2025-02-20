@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Bell, Calendar, AlertTriangle, Shirt, FileText, Plus } from "lucide-react";
+import { Bell, Calendar, AlertTriangle, Shirt, FileText, Plus, PiggyBank, User } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
@@ -23,10 +23,12 @@ import {
 import { useState } from "react";
 import NovaSolicitacaoForm from "./funcionarios/solicitacoes/components/NovaSolicitacaoForm";
 import ListaSolicitacoes from "./funcionarios/solicitacoes/components/ListaSolicitacoes";
+import { Link } from "react-router-dom";
 
 const DashboardIndex = () => {
   const { user } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [tipoSolicitacao, setTipoSolicitacao] = useState("uniforme");
 
   const { data: requests } = useQuery({
     queryKey: ['requests', user?.id],
@@ -67,6 +69,11 @@ const DashboardIndex = () => {
     },
   });
 
+  const handleSolicitacaoClick = (tipo: string) => {
+    setTipoSolicitacao(tipo);
+    setIsDialogOpen(true);
+  };
+
   const handleSolicitacaoSuccess = () => {
     setIsDialogOpen(false);
   };
@@ -92,7 +99,7 @@ const DashboardIndex = () => {
           </div>
           <div className="flex flex-wrap gap-2">
             <Button 
-              onClick={() => setIsDialogOpen(true)}
+              onClick={() => handleSolicitacaoClick('uniforme')}
               className="bg-[#8B5CF6] hover:bg-[#7C3AED] transition-colors flex-1 md:flex-none"
             >
               <Shirt className="mr-2 h-4 w-4" />
@@ -110,7 +117,7 @@ const DashboardIndex = () => {
               </DialogDescription>
             </DialogHeader>
             <NovaSolicitacaoForm 
-              tipoInicial="uniforme"
+              tipoInicial={tipoSolicitacao}
               onSuccess={handleSolicitacaoSuccess} 
             />
           </DialogContent>
@@ -158,6 +165,40 @@ const DashboardIndex = () => {
               <p className="text-sm text-muted-foreground">Aguardando aprovação</p>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Botões de ação móveis */}
+        <div className="md:hidden grid grid-cols-2 gap-3">
+          <Button
+            onClick={() => handleSolicitacaoClick('ferias')}
+            className="w-full bg-[#F97316] hover:bg-[#EA580C] transition-colors"
+          >
+            <Calendar className="mr-2 h-4 w-4" />
+            Solicitar Férias
+          </Button>
+          <Button
+            onClick={() => handleSolicitacaoClick('documento')}
+            className="w-full bg-[#0EA5E9] hover:bg-[#0284C7] transition-colors"
+          >
+            <FileText className="mr-2 h-4 w-4" />
+            Solicitar Documento
+          </Button>
+          <Button
+            onClick={() => handleSolicitacaoClick('adiantamento')}
+            className="w-full bg-[#10B981] hover:bg-[#059669] transition-colors"
+          >
+            <PiggyBank className="mr-2 h-4 w-4" />
+            Solicitar Adiantamento
+          </Button>
+          <Button
+            asChild
+            className="w-full bg-[#6366F1] hover:bg-[#4F46E5] transition-colors"
+          >
+            <Link to="/funcionario/perfil">
+              <User className="mr-2 h-4 w-4" />
+              Meu Perfil
+            </Link>
+          </Button>
         </div>
 
         <div className="space-y-4">
