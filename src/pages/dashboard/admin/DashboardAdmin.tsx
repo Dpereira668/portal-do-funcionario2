@@ -8,23 +8,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Bell, Calendar, UserX, User } from "lucide-react";
+import { Calendar, UserX, User } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Link } from "react-router-dom";
 
 const DashboardAdmin = () => {
-  const { data: pendingRequests } = useQuery({
-    queryKey: ['pending_requests'],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('requests')
-        .select('*')
-        .eq('status', 'pendente')
-        .order('created_at', { ascending: false });
-      return data || [];
-    },
-  });
-
   const { data: activeVacations } = useQuery({
     queryKey: ['active_vacations'],
     queryFn: async () => {
@@ -56,11 +44,11 @@ const DashboardAdmin = () => {
         <div>
           <h2 className="text-3xl font-bold text-primary">Dashboard Administrativo</h2>
           <p className="text-muted-foreground">
-            Gerencie faltas, férias e solicitações dos funcionários
+            Gerencie férias e faltas dos funcionários
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <Card className="hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -93,24 +81,6 @@ const DashboardAdmin = () => {
               </p>
               <Button asChild className="w-full mt-4" variant="outline">
                 <Link to="/admin/lancamento-faltas">Gerenciar Faltas</Link>
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Solicitações Pendentes
-              </CardTitle>
-              <Bell className="h-4 w-4 text-yellow-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{pendingRequests?.length || "0"}</div>
-              <p className="text-sm text-muted-foreground">
-                Aguardando aprovação
-              </p>
-              <Button asChild className="w-full mt-4" variant="outline">
-                <Link to="/admin/solicitacoes">Ver Solicitações</Link>
               </Button>
             </CardContent>
           </Card>
