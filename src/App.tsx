@@ -12,6 +12,7 @@ import LancamentoFaltas from "./pages/dashboard/admin/LancamentoFaltas";
 import UniformesIndex from "./pages/dashboard/admin/uniformes/Index";
 import DocumentosIndex from "./pages/dashboard/admin/documentos/Index";
 import FinanceiroIndex from "./pages/dashboard/admin/financeiro/Index";
+import FeriasIndex from "./pages/dashboard/admin/ferias/Index";
 import SolicitacoesDoFuncionario from "./pages/dashboard/funcionarios/solicitacoes/Index";
 import Login from "./pages/auth/Login";
 import Cadastro from "./pages/auth/Cadastro";
@@ -49,6 +50,7 @@ const App = () => (
               <Route path="uniformes" element={<UniformesIndex />} />
               <Route path="documentos" element={<DocumentosIndex />} />
               <Route path="financeiro" element={<FinanceiroIndex />} />
+              <Route path="ferias" element={<FeriasIndex />} />
             </Route>
 
             {/* Rotas de Funcionário */}
