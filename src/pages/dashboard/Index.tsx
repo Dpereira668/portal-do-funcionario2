@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import {
   Card,
@@ -85,6 +84,34 @@ const DashboardIndex = () => {
     return request.description || request.notes;
   };
 
+  const getTipoSolicitacaoTitle = (tipo: string) => {
+    switch (tipo) {
+      case 'ferias':
+        return 'Nova Solicitação de Férias';
+      case 'documento':
+        return 'Nova Solicitação de Documento';
+      case 'adiantamento':
+        return 'Nova Solicitação de Adiantamento';
+      case 'uniforme':
+      default:
+        return 'Nova Solicitação de Uniforme';
+    }
+  };
+
+  const getTipoSolicitacaoDescription = (tipo: string) => {
+    switch (tipo) {
+      case 'ferias':
+        return 'Preencha os dados para solicitar suas férias';
+      case 'documento':
+        return 'Preencha os dados para solicitar um documento';
+      case 'adiantamento':
+        return 'Preencha os dados para solicitar um adiantamento';
+      case 'uniforme':
+      default:
+        return 'Preencha os dados para solicitar seu uniforme';
+    }
+  };
+
   const proximasFerias = vacations?.length 
     ? `${format(new Date(vacations[0].start_date), "dd/MM/yyyy")} - ${vacations[0].observation || "Férias confirmadas"}`
     : "Nenhuma férias agendada";
@@ -111,9 +138,9 @@ const DashboardIndex = () => {
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent className="max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>Nova Solicitação de Uniforme</DialogTitle>
+              <DialogTitle>{getTipoSolicitacaoTitle(tipoSolicitacao)}</DialogTitle>
               <DialogDescription>
-                Preencha os dados para solicitar seu uniforme
+                {getTipoSolicitacaoDescription(tipoSolicitacao)}
               </DialogDescription>
             </DialogHeader>
             <NovaSolicitacaoForm 
