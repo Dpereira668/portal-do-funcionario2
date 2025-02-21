@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 
@@ -43,6 +43,9 @@ export const SendInviteForm = ({ onSuccess }: SendInviteFormProps) => {
     <DialogContent>
       <DialogHeader>
         <DialogTitle>Enviar Convite</DialogTitle>
+        <DialogDescription>
+          Envie um convite para adicionar um novo administrador ao sistema.
+        </DialogDescription>
       </DialogHeader>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
