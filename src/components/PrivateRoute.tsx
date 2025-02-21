@@ -30,8 +30,8 @@ const PrivateRoute = () => {
       return data;
     },
     enabled: !!user,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    cacheTime: 10 * 60 * 1000 // Keep in cache for 10 minutes
+    staleTime: 300000, // 5 minutes
+    gcTime: 600000 // 10 minutes
   });
 
   // Handle loading states first
@@ -41,11 +41,13 @@ const PrivateRoute = () => {
 
   // Handle unauthenticated users
   if (!user) {
+    console.log("Redirecting to login - no user");
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
 
   // Handle cases where profile data is not yet available
   if (!profile && !profileLoading) {
+    console.log("Redirecting to login - no profile");
     return <Navigate to="/login" replace />;
   }
 
@@ -56,17 +58,22 @@ const PrivateRoute = () => {
       description: "Você não tem permissão para acessar esta área.",
       variant: "destructive",
     });
+    console.log("Redirecting to funcionario/solicitacoes - not admin");
     return <Navigate to="/funcionario/solicitacoes" replace />;
   }
 
   // Handle root path and redirect based on role
   if (location.pathname === '/') {
-    return <Navigate to={profile?.role === 'admin' ? '/admin/solicitacoes' : '/funcionario/solicitacoes'} replace />;
+    const redirectPath = profile?.role === 'admin' ? '/admin/solicitacoes' : '/funcionario/solicitacoes';
+    console.log("Redirecting from root to", redirectPath);
+    return <Navigate to={redirectPath} replace />;
   }
 
   // Handle auth pages when user is already authenticated
   if (location.pathname === '/login' || location.pathname === '/cadastro') {
-    return <Navigate to={profile?.role === 'admin' ? '/admin/solicitacoes' : '/funcionario/solicitacoes'} replace />;
+    const redirectPath = profile?.role === 'admin' ? '/admin/solicitacoes' : '/funcionario/solicitacoes';
+    console.log("Redirecting from auth page to", redirectPath);
+    return <Navigate to={redirectPath} replace />;
   }
 
   return <Outlet />;
