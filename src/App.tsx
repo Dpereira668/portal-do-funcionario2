@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import AdminLayout from "./components/layout/AdminLayout";
+import FuncionarioLayout from "./components/layout/FuncionarioLayout";
 import SolicitacoesIndex from "./pages/dashboard/solicitacoes/Index";
 import GestaoFuncionarios from "./pages/dashboard/admin/GestaoFuncionarios";
 import LancamentoFaltas from "./pages/dashboard/admin/LancamentoFaltas";
@@ -17,6 +18,7 @@ import RelatoriosIndex from "./pages/dashboard/admin/relatorios/Index";
 import CargosIndex from "./pages/dashboard/admin/cargos/Index";
 import UnidadesIndex from "./pages/dashboard/admin/unidades/Index";
 import ConvitesIndex from "./pages/dashboard/admin/convites/Index";
+import SolicitacoesDoFuncionario from "./pages/dashboard/funcionarios/solicitacoes/Index";
 import Login from "./pages/auth/Login";
 import PrivateRoute from "./components/PrivateRoute";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -40,9 +42,14 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
 
-          {/* Rotas Protegidas */}
+          {/* Rotas de Funcionário (Sem autenticação) */}
+          <Route path="/funcionario" element={<FuncionarioLayout />}>
+            <Route index element={<Navigate to="/funcionario/solicitacoes" replace />} />
+            <Route path="solicitacoes" element={<SolicitacoesDoFuncionario />} />
+          </Route>
+
+          {/* Rotas Protegidas (Admin) */}
           <Route element={<PrivateRoute />}>
-            {/* Rotas de Admin */}
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<Navigate to="/admin/solicitacoes" replace />} />
               <Route path="solicitacoes" element={<SolicitacoesIndex />} />
