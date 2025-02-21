@@ -44,25 +44,26 @@ const PrivateRoute = () => {
   }
 
   const userRole = profile?.role || 'funcionario';
-  const currentPath = location.pathname;
+
+  // Prevent access to login/register pages when authenticated
+  if (location.pathname === '/login' || location.pathname === '/cadastro') {
+    const redirectPath = userRole === 'admin' ? '/admin/solicitacoes' : '/funcionario/solicitacoes';
+    return <Navigate to={redirectPath} replace />;
+  }
 
   // Handle admin routes
-  if (currentPath.startsWith('/admin')) {
-    if (userRole !== 'admin') {
-      toast({
-        title: "Acesso negado",
-        description: "Você não tem permissão para acessar a área administrativa",
-        variant: "destructive",
-      });
-      return <Navigate to="/funcionario/solicitacoes" replace />;
-    }
+  if (location.pathname.startsWith('/admin') && userRole !== 'admin') {
+    toast({
+      title: "Acesso negado",
+      description: "Você não tem permissão para acessar a área administrativa",
+      variant: "destructive",
+    });
+    return <Navigate to="/funcionario/solicitacoes" replace />;
   }
 
   // Handle employee routes
-  if (currentPath.startsWith('/funcionario')) {
-    if (userRole === 'admin') {
-      return <Navigate to="/admin/solicitacoes" replace />;
-    }
+  if (location.pathname.startsWith('/funcionario') && userRole === 'admin') {
+    return <Navigate to="/admin/solicitacoes" replace />;
   }
 
   return <Outlet />;

@@ -10,31 +10,36 @@ import {
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useLocation } from "react-router-dom";
 import { AuthError } from "@supabase/supabase-js";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, user } = useAuth();
+  const location = useLocation();
 
-  const getErrorMessage = (error: AuthError) => {
-    switch (error.message) {
-      case "Invalid login credentials":
-        return "Email ou senha inválidos. Por favor, verifique suas credenciais.";
-      case "Email not confirmed":
-        return "Por favor, confirme seu email antes de fazer login.";
-      default:
-        return "Ocorreu um erro ao fazer login. Por favor, tente novamente.";
-    }
-  };
+  const { data: profile } = useQuery({
+    queryKey: ['profile', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      const { data } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!user,
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
-      return;
-    }
+    if (!email || !password) return;
+    
     setLoading(true);
     try {
       await signIn(email, password);
@@ -44,6 +49,13 @@ const Login = () => {
       setLoading(false);
     }
   };
+
+  // If user is already authenticated, redirect to appropriate page
+  if (user) {
+    const userRole = profile?.role || 'funcionario';
+    const redirectPath = userRole === 'admin' ? '/admin/solicitacoes' : '/funcionario/solicitacoes';
+    return <Navigate to={redirectPath} replace />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5 flex items-center justify-center p-4">
