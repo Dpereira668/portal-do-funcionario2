@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
@@ -15,6 +16,7 @@ import FeriasIndex from "./pages/dashboard/admin/ferias/Index";
 import PunicoesIndex from "./pages/dashboard/admin/punicoes/Index";
 import RelatoriosIndex from "./pages/dashboard/admin/relatorios/Index";
 import CargosIndex from "./pages/dashboard/admin/cargos/Index";
+import UnidadesIndex from "./pages/dashboard/admin/unidades/Index";
 import SolicitacoesDoFuncionario from "./pages/dashboard/funcionarios/solicitacoes/Index";
 import Login from "./pages/auth/Login";
 import Cadastro from "./pages/auth/Cadastro";
