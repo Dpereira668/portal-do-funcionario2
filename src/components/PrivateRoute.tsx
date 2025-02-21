@@ -4,7 +4,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
-import { useEffect } from "react";
 
 const LoadingSpinner = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -36,21 +35,23 @@ const PrivateRoute = () => {
         });
         return null;
       }
-      console.log('Profile data:', data); // Debug log
+      console.log('Profile data:', data);
       return data;
     },
     enabled: !!user,
     retry: 1,
     refetchOnWindowFocus: false,
-    refetchOnMount: true, // Changed to true to ensure role is fetched
-    refetchOnReconnect: false
+    refetchOnMount: true,
+    refetchOnReconnect: false,
+    staleTime: 0, // Force a fresh fetch every time
+    cacheTime: 0  // Disable caching
   });
 
   const role = profileQuery.data?.role;
   const path = location.pathname;
 
-  console.log('Current role:', role); // Debug log
-  console.log('Current path:', path); // Debug log
+  console.log('Current role:', role);
+  console.log('Current path:', path);
 
   // Handle loading states
   if (authLoading || (user && profileQuery.isLoading)) {
@@ -62,24 +63,25 @@ const PrivateRoute = () => {
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
 
-  // Handle auth pages
-  if (path === '/login' || path === '/cadastro') {
-    return <Navigate to={role === 'admin' ? '/admin/solicitacoes' : '/funcionario/solicitacoes'} replace />;
-  }
-
-  // Important: Check role and redirect before rendering any routes
-  if (role === 'admin' && path.startsWith('/funcionario')) {
-    console.log('Redirecting admin to admin dashboard'); // Debug log
+  // Force a redirect to admin routes if user is admin
+  if (role === 'admin' && !path.startsWith('/admin')) {
+    console.log('Force redirecting admin to admin dashboard');
     return <Navigate to="/admin/solicitacoes" replace />;
   }
 
+  // Force a redirect to funcionario routes if user is not admin
   if (role !== 'admin' && path.startsWith('/admin')) {
-    console.log('Redirecting non-admin to funcionario dashboard'); // Debug log
+    console.log('Force redirecting non-admin to funcionario dashboard');
     return <Navigate to="/funcionario/solicitacoes" replace />;
   }
 
-  // If we're at root path, redirect based on role
+  // Handle root path
   if (path === '/') {
+    return <Navigate to={role === 'admin' ? '/admin/solicitacoes' : '/funcionario/solicitacoes'} replace />;
+  }
+
+  // Handle auth pages
+  if (path === '/login' || path === '/cadastro') {
     return <Navigate to={role === 'admin' ? '/admin/solicitacoes' : '/funcionario/solicitacoes'} replace />;
   }
 
