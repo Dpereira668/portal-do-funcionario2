@@ -78,7 +78,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         description: "Bem-vindo de volta!",
       });
 
-      navigate("/admin");
     } catch (error: any) {
       handleAuthError(error, "fazer login");
     }
@@ -106,7 +105,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      navigate("/");
+      navigate("/login");
     } catch (error: any) {
       handleAuthError(error, "sair");
     }

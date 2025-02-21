@@ -21,18 +21,15 @@ const PrivateRoute = () => {
         .maybeSingle();
 
       if (error) {
-        toast({
-          title: "Erro ao carregar perfil",
-          description: error.message,
-          variant: "destructive",
-        });
-        throw error;
+        console.error('Error fetching profile:', error);
+        return null;
       }
       return data;
     },
     enabled: !!user,
   });
 
+  // Show loading state while checking authentication
   if (loading || isLoadingProfile) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -41,26 +38,31 @@ const PrivateRoute = () => {
     );
   }
 
+  // If not authenticated, redirect to login
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Se não tiver perfil, considera como funcionário
   const userRole = profile?.role || 'funcionario';
+  const currentPath = location.pathname;
 
-  // Se tentar acessar área administrativa sem ser admin
-  if (location.pathname.startsWith('/admin') && userRole !== 'admin') {
-    toast({
-      title: "Acesso negado",
-      description: "Você não tem permissão para acessar a área administrativa",
-      variant: "destructive",
-    });
-    return <Navigate to="/funcionario/solicitacoes" replace />;
+  // Handle admin routes
+  if (currentPath.startsWith('/admin')) {
+    if (userRole !== 'admin') {
+      toast({
+        title: "Acesso negado",
+        description: "Você não tem permissão para acessar a área administrativa",
+        variant: "destructive",
+      });
+      return <Navigate to="/funcionario/solicitacoes" replace />;
+    }
   }
 
-  // Se for admin tentando acessar área de funcionário
-  if (location.pathname.startsWith('/funcionario') && userRole === 'admin') {
-    return <Navigate to="/admin/solicitacoes" replace />;
+  // Handle employee routes
+  if (currentPath.startsWith('/funcionario')) {
+    if (userRole === 'admin') {
+      return <Navigate to="/admin/solicitacoes" replace />;
+    }
   }
 
   return <Outlet />;
