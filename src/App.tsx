@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
@@ -57,6 +56,7 @@ const App = () => (
               <Route path="punicoes" element={<PunicoesIndex />} />
               <Route path="relatorios" element={<RelatoriosIndex />} />
               <Route path="cargos" element={<CargosIndex />} />
+              <Route path="unidades" element={<UnidadesIndex />} />
             </Route>
 
             {/* Rotas de Funcionário */}
