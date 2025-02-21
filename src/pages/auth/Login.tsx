@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
-import { Link, Navigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
@@ -20,21 +20,25 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const { signIn, user } = useAuth();
-  const location = useLocation();
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   const { data: profile } = useQuery({
     queryKey: ['profile', user?.id],
     queryFn: async () => {
       if (!user) return null;
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', user.id)
         .maybeSingle();
+      
+      if (error) throw error;
       return data;
     },
     enabled: !!user,
+    staleTime: 300000, // 5 minutes
+    gcTime: 600000, // 10 minutes
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -44,6 +48,7 @@ const Login = () => {
     setLoading(true);
     try {
       await signIn(email, password);
+      console.log("Login successful");
     } catch (error: any) {
       console.error("Login error:", error);
       toast({
@@ -56,10 +61,12 @@ const Login = () => {
     }
   };
 
-  // If user is already authenticated, redirect to appropriate page
+  // If user is already authenticated and has a profile, redirect to appropriate page
   if (user && profile) {
+    console.log("User and profile found, redirecting", { user, profile });
     const redirectTo = profile.role === 'admin' ? '/admin/solicitacoes' : '/funcionario/solicitacoes';
-    return <Navigate to={redirectTo} replace />;
+    navigate(redirectTo, { replace: true });
+    return null;
   }
 
   return (

@@ -24,13 +24,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Fetch initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("Initial session fetch:", session);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
+    // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log("Auth state changed:", session);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
