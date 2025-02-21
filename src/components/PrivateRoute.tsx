@@ -29,12 +29,12 @@ const PrivateRoute = () => {
       }
     },
     enabled: !!user,
-    staleTime: 30000, // Cache for 30 seconds
-    cacheTime: 60000, // Keep in cache for 1 minute
+    gcTime: 60000, // Keep in garbage collection for 1 minute
+    staleTime: 30000, // Consider data fresh for 30 seconds
   });
 
-  // Show loading state while checking authentication
-  if (loading || isLoadingProfile) {
+  // Handle initial loading state
+  if (loading || (user && isLoadingProfile)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
@@ -42,23 +42,22 @@ const PrivateRoute = () => {
     );
   }
 
-  // If not authenticated, redirect to login
+  // If user is not authenticated, redirect to login
   if (!user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    const from = location.pathname;
+    return <Navigate to="/login" state={{ from }} replace />;
   }
 
   const userRole = profile?.role || 'funcionario';
-  const isAdminRoute = location.pathname.startsWith('/admin');
-  const isFuncionarioRoute = location.pathname.startsWith('/funcionario');
-  const isAuthRoute = location.pathname === '/login' || location.pathname === '/cadastro';
+  const path = location.pathname;
 
-  // If on auth routes while authenticated, redirect based on role
-  if (isAuthRoute) {
+  // Handle authentication routes when already logged in
+  if (path === '/login' || path === '/cadastro') {
     return <Navigate to={userRole === 'admin' ? '/admin/solicitacoes' : '/funcionario/solicitacoes'} replace />;
   }
 
-  // Check role-based access
-  if (isAdminRoute && userRole !== 'admin') {
+  // Handle admin routes access
+  if (path.startsWith('/admin') && userRole !== 'admin') {
     toast({
       title: "Acesso negado",
       description: "Você não tem permissão para acessar a área administrativa",
@@ -67,7 +66,8 @@ const PrivateRoute = () => {
     return <Navigate to="/funcionario/solicitacoes" replace />;
   }
 
-  if (isFuncionarioRoute && userRole === 'admin') {
+  // Handle funcionario routes access for admin
+  if (path.startsWith('/funcionario') && userRole === 'admin') {
     return <Navigate to="/admin/solicitacoes" replace />;
   }
 
