@@ -45,7 +45,7 @@ const PrivateRoute = () => {
     refetchOnReconnect: false
   });
 
-  const role = profileQuery.data?.role ?? 'funcionario';
+  const role = profileQuery.data?.role;
   const path = location.pathname;
 
   useEffect(() => {
@@ -78,9 +78,14 @@ const PrivateRoute = () => {
     return <Navigate to="/funcionario/solicitacoes" replace />;
   }
 
-  // Handle funcionario routes
+  // Handle funcionario routes when user is admin
   if (path.startsWith('/funcionario') && role === 'admin') {
     return <Navigate to="/admin/solicitacoes" replace />;
+  }
+
+  // If we're at root path, redirect based on role
+  if (path === '/') {
+    return <Navigate to={role === 'admin' ? '/admin/solicitacoes' : '/funcionario/solicitacoes'} replace />;
   }
 
   return <Outlet />;
