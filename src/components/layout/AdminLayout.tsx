@@ -6,6 +6,7 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarProvider,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
@@ -21,13 +22,35 @@ import {
   Mail,
   ScrollText,
   PiggyBank,
+  LogOut,
 } from "lucide-react";
 import { Outlet } from "react-router-dom";
 import SidebarMenuList, { MenuItem } from "../ui/SidebarMenuList";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Button } from "../ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 const AdminLayout = () => {
   const isMobile = useIsMobile();
+  const { signOut } = useAuth();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Logout realizado",
+        description: "Você foi desconectado com sucesso",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao sair",
+        description: "Não foi possível realizar o logout",
+        variant: "destructive",
+      });
+    }
+  };
 
   const menuItems: MenuItem[] = [
     {
@@ -118,6 +141,16 @@ const AdminLayout = () => {
               </SidebarGroup>
             </SidebarContent>
           </ScrollArea>
+          <SidebarFooter className="p-4 border-t">
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50"
+              onClick={handleLogout}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Sair do Sistema
+            </Button>
+          </SidebarFooter>
         </Sidebar>
         <main className="flex-1 overflow-hidden bg-background">
           <Outlet />
