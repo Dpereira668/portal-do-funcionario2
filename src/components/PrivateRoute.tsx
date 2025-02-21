@@ -18,7 +18,7 @@ const PrivateRoute = () => {
         .from('profiles')
         .select('role')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
       if (error) {
         toast({
@@ -45,19 +45,22 @@ const PrivateRoute = () => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Se tentar acessar área administrativa sem ser admin, redireciona para área de funcionário
-  if (location.pathname.startsWith('/admin') && profile?.role !== 'admin') {
+  // Se não tiver perfil, considera como funcionário
+  const userRole = profile?.role || 'funcionario';
+
+  // Se tentar acessar área administrativa sem ser admin
+  if (location.pathname.startsWith('/admin') && userRole !== 'admin') {
     toast({
       title: "Acesso negado",
       description: "Você não tem permissão para acessar a área administrativa",
       variant: "destructive",
     });
-    return <Navigate to="/funcionario" replace />;
+    return <Navigate to="/funcionario/solicitacoes" replace />;
   }
 
-  // Se for admin tentando acessar área de funcionário, redireciona para área administrativa
-  if (location.pathname.startsWith('/funcionario') && profile?.role === 'admin') {
-    return <Navigate to="/admin" replace />;
+  // Se for admin tentando acessar área de funcionário
+  if (location.pathname.startsWith('/funcionario') && userRole === 'admin') {
+    return <Navigate to="/admin/solicitacoes" replace />;
   }
 
   return <Outlet />;
