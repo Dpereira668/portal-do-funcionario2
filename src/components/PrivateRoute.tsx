@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 
 const LoadingSpinner = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -34,18 +34,30 @@ const PrivateRoute = () => {
       return data;
     },
     enabled: !!user,
-    staleTime: 300000, // 5 minutes
-    gcTime: 300000, // 5 minutes (replaces cacheTime)
+    staleTime: 300000,
+    gcTime: 300000,
     retry: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false
   });
 
-  // Memoize the role to prevent unnecessary re-renders
   const role = useMemo(() => {
     return profileQuery.data?.role ?? 'funcionario';
   }, [profileQuery.data?.role]);
+
+  const path = location.pathname;
+
+  // Handle access denial notification separately from render logic
+  useEffect(() => {
+    if (path.startsWith('/admin') && role !== 'admin' && !profileQuery.isLoading && !authLoading) {
+      toast({
+        title: "Acesso negado",
+        description: "Você não tem permissão para acessar a área administrativa",
+        variant: "destructive",
+      });
+    }
+  }, [path, role, profileQuery.isLoading, authLoading, toast]);
 
   // Handle loading states
   if (authLoading) {
@@ -58,24 +70,17 @@ const PrivateRoute = () => {
   }
 
   // Handle profile loading
-  if (profileQuery.isLoading && user) {
+  if (profileQuery.isLoading) {
     return <LoadingSpinner />;
   }
 
-  const path = location.pathname;
-
-  // Handle authenticated routes
+  // Handle auth pages
   if (path === '/login' || path === '/cadastro') {
     return <Navigate to={role === 'admin' ? '/admin/solicitacoes' : '/funcionario/solicitacoes'} replace />;
   }
 
   // Handle admin routes
   if (path.startsWith('/admin') && role !== 'admin') {
-    toast({
-      title: "Acesso negado",
-      description: "Você não tem permissão para acessar a área administrativa",
-      variant: "destructive",
-    });
     return <Navigate to="/funcionario/solicitacoes" replace />;
   }
 
