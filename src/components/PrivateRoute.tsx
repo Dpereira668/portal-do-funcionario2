@@ -35,33 +35,41 @@ const PrivateRoute = () => {
     },
     enabled: !!user,
     staleTime: 300000, // 5 minutes
-    cacheTime: 300000, // 5 minutes
+    gcTime: 300000, // 5 minutes (replaces cacheTime)
     retry: false,
     refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false
   });
 
-  const role = useMemo(() => profileQuery.data?.role ?? 'funcionario', [profileQuery.data]);
+  // Memoize the role to prevent unnecessary re-renders
+  const role = useMemo(() => {
+    return profileQuery.data?.role ?? 'funcionario';
+  }, [profileQuery.data?.role]);
 
-  if (authLoading) {
+  // Handle loading states
+  if (authLoading || (!user && loading)) {
     return <LoadingSpinner />;
   }
 
+  // Handle unauthenticated users
   if (!user) {
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
 
-  if (profileQuery.isLoading) {
+  // Handle profile loading
+  if (profileQuery.isLoading && user) {
     return <LoadingSpinner />;
   }
 
   const path = location.pathname;
 
+  // Handle authenticated routes
   if (path === '/login' || path === '/cadastro') {
-    const redirectPath = role === 'admin' ? '/admin/solicitacoes' : '/funcionario/solicitacoes';
-    return <Navigate to={redirectPath} replace />;
+    return <Navigate to={role === 'admin' ? '/admin/solicitacoes' : '/funcionario/solicitacoes'} replace />;
   }
 
-  // Verify admin access
+  // Handle admin routes
   if (path.startsWith('/admin') && role !== 'admin') {
     toast({
       title: "Acesso negado",
@@ -71,7 +79,7 @@ const PrivateRoute = () => {
     return <Navigate to="/funcionario/solicitacoes" replace />;
   }
 
-  // Verify funcionario access
+  // Handle funcionario routes
   if (path.startsWith('/funcionario') && role === 'admin') {
     return <Navigate to="/admin/solicitacoes" replace />;
   }
