@@ -1,9 +1,14 @@
 
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { User, IdCard, UserCog, MapPin, Mail } from "lucide-react";
 import UniformeForm from "./UniformeForm";
 import DatasForm from "./DatasForm";
 import AdiantamentoForm from "./AdiantamentoForm";
 import { useSolicitacaoForm } from "../hooks/useSolicitacaoForm";
+import { useState } from "react";
 
 interface NovaSolicitacaoFormProps {
   onSuccess: () => void;
@@ -16,8 +21,100 @@ const NovaSolicitacaoForm = ({ onSuccess, tipoInicial }: NovaSolicitacaoFormProp
     tipoInicial,
   });
 
+  const [formData, setFormData] = useState({
+    nome: "",
+    cpf: "",
+    funcao: "",
+    posto: "",
+    email: "",
+  });
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+      <Card className="p-4">
+        <CardContent className="space-y-4 p-0">
+          <div className="space-y-2">
+            <Label htmlFor="nome">Nome</Label>
+            <div className="relative">
+              <User className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="nome"
+                placeholder="Seu nome completo"
+                className="pl-8"
+                value={formData.nome}
+                onChange={(e) => handleInputChange('nome', e.target.value)}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="cpf">CPF</Label>
+            <div className="relative">
+              <IdCard className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="cpf"
+                placeholder="000.000.000-00"
+                className="pl-8"
+                value={formData.cpf}
+                onChange={(e) => handleInputChange('cpf', e.target.value)}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="funcao">Função</Label>
+            <div className="relative">
+              <UserCog className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="funcao"
+                placeholder="Sua função"
+                className="pl-8"
+                value={formData.funcao}
+                onChange={(e) => handleInputChange('funcao', e.target.value)}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="posto">Posto</Label>
+            <div className="relative">
+              <MapPin className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="posto"
+                placeholder="Seu posto"
+                className="pl-8"
+                value={formData.posto}
+                onChange={(e) => handleInputChange('posto', e.target.value)}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <div className="relative">
+              <Mail className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="email"
+                type="email"
+                placeholder="seu.email@exemplo.com"
+                className="pl-8"
+                value={formData.email}
+                onChange={(e) => handleInputChange('email', e.target.value)}
+                required
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {novaSolicitacao.tipo === "uniforme" && (
         <UniformeForm
           itens={novaSolicitacao.uniformeItens}
