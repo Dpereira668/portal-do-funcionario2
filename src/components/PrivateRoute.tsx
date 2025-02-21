@@ -4,13 +4,20 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
+import { useMemo } from "react";
+
+const LoadingSpinner = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+  </div>
+);
 
 const PrivateRoute = () => {
   const { user, loading: authLoading } = useAuth();
   const location = useLocation();
   const { toast } = useToast();
 
-  const { data: profile, isLoading: profileLoading } = useQuery({
+  const profileQuery = useQuery({
     queryKey: ['profile', user?.id],
     queryFn: async () => {
       if (!user) return null;
@@ -26,44 +33,35 @@ const PrivateRoute = () => {
       }
       return data;
     },
-    enabled: !!user && !authLoading,
-    retry: 1,
-    staleTime: Infinity,
+    enabled: !!user,
+    staleTime: 300000, // 5 minutes
+    cacheTime: 300000, // 5 minutes
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 
-  // Show loading spinner while checking authentication
+  const role = useMemo(() => profileQuery.data?.role ?? 'funcionario', [profileQuery.data]);
+
   if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
-  // Redirect to login if not authenticated
   if (!user) {
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
 
-  // Show loading spinner while fetching profile
-  if (profileLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-      </div>
-    );
+  if (profileQuery.isLoading) {
+    return <LoadingSpinner />;
   }
 
-  const role = profile?.role ?? 'funcionario';
   const path = location.pathname;
 
-  // Redirect from auth routes if already logged in
   if (path === '/login' || path === '/cadastro') {
     const redirectPath = role === 'admin' ? '/admin/solicitacoes' : '/funcionario/solicitacoes';
     return <Navigate to={redirectPath} replace />;
   }
 
-  // Handle admin route access
+  // Verify admin access
   if (path.startsWith('/admin') && role !== 'admin') {
     toast({
       title: "Acesso negado",
@@ -73,7 +71,7 @@ const PrivateRoute = () => {
     return <Navigate to="/funcionario/solicitacoes" replace />;
   }
 
-  // Handle funcionario route access
+  // Verify funcionario access
   if (path.startsWith('/funcionario') && role === 'admin') {
     return <Navigate to="/admin/solicitacoes" replace />;
   }
