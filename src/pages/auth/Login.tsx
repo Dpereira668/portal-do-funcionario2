@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
@@ -20,7 +20,6 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const { signIn, user } = useAuth();
-  const navigate = useNavigate();
   const { toast } = useToast();
 
   const { data: profile } = useQuery({
@@ -64,9 +63,7 @@ const Login = () => {
   // If user is already authenticated and has a profile, redirect to appropriate page
   if (user && profile) {
     console.log("User and profile found, redirecting", { user, profile });
-    const redirectTo = profile.role === 'admin' ? '/admin/solicitacoes' : '/funcionario/solicitacoes';
-    navigate(redirectTo, { replace: true });
-    return null;
+    return <Navigate to={profile.role === 'admin' ? '/admin/solicitacoes' : '/funcionario/solicitacoes'} replace />;
   }
 
   return (
