@@ -66,6 +66,36 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_invites: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          email: string
+          expires_at: string
+          id: string
+          token: string | null
+          used_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          email: string
+          expires_at?: string
+          id?: string
+          token?: string | null
+          used_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          expires_at?: string
+          id?: string
+          token?: string | null
+          used_at?: string | null
+        }
+        Relationships: []
+      }
       admin_profiles: {
         Row: {
           created_at: string
