@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { format } from "date-fns";
 import { LucideIcon } from "lucide-react";
 import SolicitacaoCard from "./SolicitacaoCard";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface Solicitacao {
   id: number;
@@ -41,22 +42,24 @@ const ListaSolicitacoes = ({
   }
 
   return (
-    <div className="grid gap-4">
-      {solicitacoes.map((solicitacao) => (
-        <SolicitacaoCard
-          key={solicitacao.id}
-          id={solicitacao.id}
-          tipo={solicitacao.type}
-          status={solicitacao.status}
-          dataInicio={format(new Date(solicitacao.created_at), 'dd/MM/yyyy')}
-          dataFim={solicitacao.end_date}
-          observacoes={solicitacao.notes}
-          detalhes={formatRequestDetails(solicitacao)}
-          icon={getIconForType(solicitacao.type)}
-          getStatusColor={getStatusColor}
-        />
-      ))}
-    </div>
+    <ScrollArea className="h-[500px] rounded-md border p-4">
+      <div className="grid gap-4 pr-4">
+        {solicitacoes.map((solicitacao) => (
+          <SolicitacaoCard
+            key={solicitacao.id}
+            id={solicitacao.id}
+            tipo={solicitacao.type}
+            status={solicitacao.status}
+            dataInicio={format(new Date(solicitacao.created_at), 'dd/MM/yyyy')}
+            dataFim={solicitacao.end_date}
+            observacoes={solicitacao.notes}
+            detalhes={formatRequestDetails(solicitacao)}
+            icon={getIconForType(solicitacao.type)}
+            getStatusColor={getStatusColor}
+          />
+        ))}
+      </div>
+    </ScrollArea>
   );
 };
 
