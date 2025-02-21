@@ -14,19 +14,23 @@ const PrivateRoute = () => {
     queryKey: ['profile', user?.id],
     queryFn: async () => {
       if (!user) return null;
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .maybeSingle();
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .maybeSingle();
 
-      if (error) {
+        if (error) throw error;
+        return data;
+      } catch (error) {
         console.error('Error fetching profile:', error);
         return null;
       }
-      return data;
     },
     enabled: !!user,
+    staleTime: 30000, // Cache for 30 seconds
+    cacheTime: 60000, // Keep in cache for 1 minute
   });
 
   // Show loading state while checking authentication
@@ -44,15 +48,17 @@ const PrivateRoute = () => {
   }
 
   const userRole = profile?.role || 'funcionario';
+  const isAdminRoute = location.pathname.startsWith('/admin');
+  const isFuncionarioRoute = location.pathname.startsWith('/funcionario');
+  const isAuthRoute = location.pathname === '/login' || location.pathname === '/cadastro';
 
-  // Prevent access to login/register pages when authenticated
-  if (location.pathname === '/login' || location.pathname === '/cadastro') {
-    const redirectPath = userRole === 'admin' ? '/admin/solicitacoes' : '/funcionario/solicitacoes';
-    return <Navigate to={redirectPath} replace />;
+  // If on auth routes while authenticated, redirect based on role
+  if (isAuthRoute) {
+    return <Navigate to={userRole === 'admin' ? '/admin/solicitacoes' : '/funcionario/solicitacoes'} replace />;
   }
 
-  // Handle admin routes
-  if (location.pathname.startsWith('/admin') && userRole !== 'admin') {
+  // Check role-based access
+  if (isAdminRoute && userRole !== 'admin') {
     toast({
       title: "Acesso negado",
       description: "Você não tem permissão para acessar a área administrativa",
@@ -61,11 +67,11 @@ const PrivateRoute = () => {
     return <Navigate to="/funcionario/solicitacoes" replace />;
   }
 
-  // Handle employee routes
-  if (location.pathname.startsWith('/funcionario') && userRole === 'admin') {
+  if (isFuncionarioRoute && userRole === 'admin') {
     return <Navigate to="/admin/solicitacoes" replace />;
   }
 
+  // Allow access to the route
   return <Outlet />;
 };
 
