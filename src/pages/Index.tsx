@@ -46,7 +46,7 @@ const Index = () => {
               Área do Funcionário
             </Button>
             <p className="text-sm text-muted-foreground">
-              Acesse suas solicitações e documentos
+              Faça suas solicitações
             </p>
           </div>
         </div>
