@@ -42,6 +42,16 @@ const PrivateRoute = () => {
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
 
+  // Handle admin-only routes
+  if (location.pathname.startsWith('/admin') && profile?.role !== 'admin') {
+    toast({
+      title: "Acesso negado",
+      description: "Você não tem permissão para acessar esta área.",
+      variant: "destructive",
+    });
+    return <Navigate to="/funcionario/solicitacoes" replace />;
+  }
+
   // Handle root path and redirect based on role
   if (location.pathname === '/') {
     return <Navigate to={profile?.role === 'admin' ? '/admin/solicitacoes' : '/funcionario/solicitacoes'} replace />;
