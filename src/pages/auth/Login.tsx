@@ -11,8 +11,6 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
@@ -21,24 +19,6 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const { signIn, user } = useAuth();
   const { toast } = useToast();
-
-  const { data: profile } = useQuery({
-    queryKey: ['profile', user?.id],
-    queryFn: async () => {
-      if (!user) return null;
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .maybeSingle();
-      
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user,
-    staleTime: 300000, // 5 minutes
-    gcTime: 600000, // 10 minutes
-  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,17 +40,17 @@ const Login = () => {
     }
   };
 
-  // If user is already authenticated and has a profile, redirect to appropriate page
-  if (user && profile) {
-    console.log("User and profile found, redirecting", { user, profile });
-    return <Navigate to={profile.role === 'admin' ? '/admin/solicitacoes' : '/funcionario/solicitacoes'} replace />;
+  // Se o usuário estiver autenticado, redireciona direto para a área administrativa
+  if (user) {
+    console.log("User authenticated, redirecting to admin");
+    return <Navigate to="/admin/solicitacoes" replace />;
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Login</CardTitle>
+          <CardTitle className="text-2xl font-bold">Login Administrativo</CardTitle>
           <CardDescription>
             Entre com suas credenciais para acessar o sistema
           </CardDescription>
@@ -114,11 +94,6 @@ const Login = () => {
               )}
             </Button>
           </form>
-          <div className="mt-4 text-center text-sm">
-            <Link to="/cadastro" className="text-primary hover:underline">
-              Não tem uma conta? Cadastre-se
-            </Link>
-          </div>
         </CardContent>
       </Card>
     </div>
