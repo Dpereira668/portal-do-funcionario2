@@ -36,27 +36,21 @@ const PrivateRoute = () => {
         });
         return null;
       }
+      console.log('Profile data:', data); // Debug log
       return data;
     },
     enabled: !!user,
     retry: 1,
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    refetchOnMount: true, // Changed to true to ensure role is fetched
     refetchOnReconnect: false
   });
 
   const role = profileQuery.data?.role;
   const path = location.pathname;
 
-  useEffect(() => {
-    if (path.startsWith('/admin') && role !== 'admin' && !profileQuery.isLoading && !authLoading) {
-      toast({
-        title: "Acesso negado",
-        description: "Você não tem permissão para acessar a área administrativa",
-        variant: "destructive",
-      });
-    }
-  }, [path, role, profileQuery.isLoading, authLoading, toast]);
+  console.log('Current role:', role); // Debug log
+  console.log('Current path:', path); // Debug log
 
   // Handle loading states
   if (authLoading || (user && profileQuery.isLoading)) {
@@ -73,14 +67,15 @@ const PrivateRoute = () => {
     return <Navigate to={role === 'admin' ? '/admin/solicitacoes' : '/funcionario/solicitacoes'} replace />;
   }
 
-  // Handle admin routes
-  if (path.startsWith('/admin') && role !== 'admin') {
-    return <Navigate to="/funcionario/solicitacoes" replace />;
+  // Important: Check role and redirect before rendering any routes
+  if (role === 'admin' && path.startsWith('/funcionario')) {
+    console.log('Redirecting admin to admin dashboard'); // Debug log
+    return <Navigate to="/admin/solicitacoes" replace />;
   }
 
-  // Handle funcionario routes when user is admin
-  if (path.startsWith('/funcionario') && role === 'admin') {
-    return <Navigate to="/admin/solicitacoes" replace />;
+  if (role !== 'admin' && path.startsWith('/admin')) {
+    console.log('Redirecting non-admin to funcionario dashboard'); // Debug log
+    return <Navigate to="/funcionario/solicitacoes" replace />;
   }
 
   // If we're at root path, redirect based on role
