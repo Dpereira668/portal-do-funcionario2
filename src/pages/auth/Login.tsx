@@ -14,13 +14,19 @@ import { Link, Navigate, useLocation } from "react-router-dom";
 import { AuthError } from "@supabase/supabase-js";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { useToast } from "@/hooks/use-toast";
+
+const ADMIN_PASSWORD = "Lumarj2024";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
+  const [showAdminField, setShowAdminField] = useState(false);
   const [loading, setLoading] = useState(false);
   const { signIn, user } = useAuth();
   const location = useLocation();
+  const { toast } = useToast();
 
   const { data: profile } = useQuery({
     queryKey: ['profile', user?.id],
@@ -43,8 +49,40 @@ const Login = () => {
     setLoading(true);
     try {
       await signIn(email, password);
+      
+      // Verificar se é uma tentativa de acesso administrativo
+      if (showAdminField && adminPassword !== ADMIN_PASSWORD) {
+        toast({
+          title: "Acesso negado",
+          description: "Senha administrativa incorreta",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Se a senha administrativa estiver correta, o perfil será atualizado para admin
+      if (showAdminField && adminPassword === ADMIN_PASSWORD) {
+        const { error } = await supabase
+          .from('profiles')
+          .update({ role: 'admin' })
+          .eq('id', user?.id);
+          
+        if (error) {
+          console.error('Error updating role:', error);
+          toast({
+            title: "Erro ao atualizar perfil",
+            description: "Não foi possível definir permissões administrativas",
+            variant: "destructive",
+          });
+        }
+      }
     } catch (error: any) {
       console.error("Login error:", error);
+      toast({
+        title: "Erro no login",
+        description: "Verifique suas credenciais e tente novamente",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -93,10 +131,36 @@ const Login = () => {
                 required
               />
             </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="adminAccess"
+                checked={showAdminField}
+                onChange={(e) => setShowAdminField(e.target.checked)}
+                className="rounded border-gray-300"
+              />
+              <label htmlFor="adminAccess" className="text-sm">
+                Acesso Administrativo
+              </label>
+            </div>
+            {showAdminField && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium" htmlFor="adminPassword">
+                  Senha Administrativa
+                </label>
+                <Input
+                  id="adminPassword"
+                  type="password"
+                  value={adminPassword}
+                  onChange={(e) => setAdminPassword(e.target.value)}
+                  required={showAdminField}
+                />
+              </div>
+            )}
             <Button
               type="submit"
               className="w-full"
-              disabled={loading || !email || !password}
+              disabled={loading || !email || !password || (showAdminField && !adminPassword)}
             >
               {loading ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />

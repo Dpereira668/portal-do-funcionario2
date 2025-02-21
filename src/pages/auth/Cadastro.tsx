@@ -12,12 +12,17 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
+
+const ADMIN_PASSWORD = "Lumarj2024";
 
 const Cadastro = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [cpf, setCpf] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
+  const [showAdminField, setShowAdminField] = useState(false);
   const [loading, setLoading] = useState(false);
   const { signUp } = useAuth();
   const { toast } = useToast();
@@ -42,9 +47,39 @@ const Cadastro = () => {
       return;
     }
 
+    if (showAdminField && adminPassword !== ADMIN_PASSWORD) {
+      toast({
+        title: "Senha administrativa incorreta",
+        description: "A senha administrativa fornecida está incorreta",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       await signUp(email, password);
+      
+      // Se a senha administrativa estiver correta, atualiza o perfil para admin
+      if (showAdminField && adminPassword === ADMIN_PASSWORD) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { error } = await supabase
+            .from('profiles')
+            .update({ role: 'admin' })
+            .eq('id', user.id);
+            
+          if (error) {
+            console.error('Error updating role:', error);
+            toast({
+              title: "Erro ao configurar perfil administrativo",
+              description: "Houve um problema ao definir as permissões administrativas",
+              variant: "destructive",
+            });
+          }
+        }
+      }
+      
       toast({
         title: "Cadastro realizado",
         description: "Sua conta foi criada com sucesso!",
@@ -127,6 +162,32 @@ const Cadastro = () => {
                 <p className="text-sm text-destructive">As senhas não coincidem</p>
               )}
             </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="adminAccess"
+                checked={showAdminField}
+                onChange={(e) => setShowAdminField(e.target.checked)}
+                className="rounded border-gray-300"
+              />
+              <label htmlFor="adminAccess" className="text-sm">
+                Acesso Administrativo
+              </label>
+            </div>
+            {showAdminField && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium" htmlFor="adminPassword">
+                  Senha Administrativa
+                </label>
+                <Input
+                  id="adminPassword"
+                  type="password"
+                  value={adminPassword}
+                  onChange={(e) => setAdminPassword(e.target.value)}
+                  required={showAdminField}
+                />
+              </div>
+            )}
             <Button
               type="submit"
               className="w-full"
@@ -136,7 +197,8 @@ const Cadastro = () => {
                 !password ||
                 !confirmPassword ||
                 !cpf ||
-                password !== confirmPassword
+                password !== confirmPassword ||
+                (showAdminField && !adminPassword)
               }
             >
               {loading ? (
