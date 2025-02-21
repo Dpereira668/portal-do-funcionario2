@@ -29,17 +29,24 @@ const PrivateRoute = () => {
       if (error) throw error;
       return data;
     },
-    enabled: !!user
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    cacheTime: 10 * 60 * 1000 // Keep in cache for 10 minutes
   });
 
-  // Handle loading states
-  if (authLoading || profileLoading) {
+  // Handle loading states first
+  if (authLoading || (user && profileLoading)) {
     return <LoadingSpinner />;
   }
 
   // Handle unauthenticated users
   if (!user) {
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+  }
+
+  // Handle cases where profile data is not yet available
+  if (!profile && !profileLoading) {
+    return <Navigate to="/login" replace />;
   }
 
   // Handle admin-only routes
