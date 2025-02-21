@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
-import { useMemo, useEffect } from "react";
+import { useEffect } from "react";
 
 const LoadingSpinner = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -29,26 +29,25 @@ const PrivateRoute = () => {
       
       if (error) {
         console.error('Error fetching profile:', error);
+        toast({
+          title: "Erro ao carregar perfil",
+          description: "Houve um problema ao carregar suas informações",
+          variant: "destructive",
+        });
         return null;
       }
       return data;
     },
     enabled: !!user,
-    staleTime: 300000,
-    gcTime: 300000,
-    retry: false,
+    retry: 1,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false
   });
 
-  const role = useMemo(() => {
-    return profileQuery.data?.role ?? 'funcionario';
-  }, [profileQuery.data?.role]);
-
+  const role = profileQuery.data?.role ?? 'funcionario';
   const path = location.pathname;
 
-  // Handle access denial notification separately from render logic
   useEffect(() => {
     if (path.startsWith('/admin') && role !== 'admin' && !profileQuery.isLoading && !authLoading) {
       toast({
@@ -60,18 +59,13 @@ const PrivateRoute = () => {
   }, [path, role, profileQuery.isLoading, authLoading, toast]);
 
   // Handle loading states
-  if (authLoading) {
+  if (authLoading || (user && profileQuery.isLoading)) {
     return <LoadingSpinner />;
   }
 
   // Handle unauthenticated users
   if (!user) {
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
-  }
-
-  // Handle profile loading
-  if (profileQuery.isLoading) {
-    return <LoadingSpinner />;
   }
 
   // Handle auth pages
