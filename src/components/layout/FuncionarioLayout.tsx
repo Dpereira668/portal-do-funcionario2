@@ -1,6 +1,5 @@
 
 import { Outlet } from "react-router-dom";
-import { Sidebar } from "../ui/sidebar";
 import {
   CalendarDays,
   FileText,
@@ -13,8 +12,10 @@ import { Button } from "../ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { Sidebar, SidebarProvider } from "../ui/sidebar";
+import { SidebarNav, SidebarNavItem } from "../ui/SidebarNav";
 
-const FuncionarioLayout = () => {
+const SidebarContent = () => {
   const { signOut } = useAuth();
   const { toast } = useToast();
 
@@ -35,64 +36,56 @@ const FuncionarioLayout = () => {
   };
 
   return (
-    <div className="flex h-screen">
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button
-            variant="ghost"
-            className="flex md:hidden absolute top-4 left-4"
-            size="icon"
-          >
-            <Menu className="h-6 w-6" />
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="p-0 w-72">
-          <Sidebar>
-            <Sidebar.Nav>
-              <Sidebar.NavItem href="/funcionario/solicitacoes" icon={ScrollText}>
-                Solicitações
-              </Sidebar.NavItem>
-              <Sidebar.NavItem href="/funcionario/documentos" icon={FileText}>
-                Documentos
-              </Sidebar.NavItem>
-              <Sidebar.NavItem href="/funcionario/ferias" icon={CalendarDays}>
-                Férias
-              </Sidebar.NavItem>
-              <Sidebar.NavItem href="/funcionario/perfil" icon={UserCircle}>
-                Meu Perfil
-              </Sidebar.NavItem>
-              <Sidebar.NavItem onClick={handleLogout} icon={LogOut}>
-                Sair
-              </Sidebar.NavItem>
-            </Sidebar.Nav>
-          </Sidebar>
-        </SheetContent>
-      </Sheet>
+    <SidebarNav>
+      <SidebarNavItem href="/funcionario/solicitacoes" icon={ScrollText}>
+        Solicitações
+      </SidebarNavItem>
+      <SidebarNavItem href="/funcionario/documentos" icon={FileText}>
+        Documentos
+      </SidebarNavItem>
+      <SidebarNavItem href="/funcionario/ferias" icon={CalendarDays}>
+        Férias
+      </SidebarNavItem>
+      <SidebarNavItem href="/funcionario/perfil" icon={UserCircle}>
+        Meu Perfil
+      </SidebarNavItem>
+      <SidebarNavItem onClick={handleLogout} icon={LogOut}>
+        Sair
+      </SidebarNavItem>
+    </SidebarNav>
+  );
+};
 
-      <Sidebar className="hidden md:flex">
-        <Sidebar.Nav>
-          <Sidebar.NavItem href="/funcionario/solicitacoes" icon={ScrollText}>
-            Solicitações
-          </Sidebar.NavItem>
-          <Sidebar.NavItem href="/funcionario/documentos" icon={FileText}>
-            Documentos
-          </Sidebar.NavItem>
-          <Sidebar.NavItem href="/funcionario/ferias" icon={CalendarDays}>
-            Férias
-          </Sidebar.NavItem>
-          <Sidebar.NavItem href="/funcionario/perfil" icon={UserCircle}>
-            Meu Perfil
-          </Sidebar.NavItem>
-          <Sidebar.NavItem onClick={handleLogout} icon={LogOut}>
-            Sair
-          </Sidebar.NavItem>
-        </Sidebar.Nav>
-      </Sidebar>
+const FuncionarioLayout = () => {
+  return (
+    <SidebarProvider>
+      <div className="flex h-screen w-full">
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button
+              variant="ghost"
+              className="flex md:hidden absolute top-4 left-4"
+              size="icon"
+            >
+              <Menu className="h-6 w-6" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="p-0 w-72">
+            <Sidebar>
+              <SidebarContent />
+            </Sidebar>
+          </SheetContent>
+        </Sheet>
 
-      <main className="flex-1 overflow-y-auto bg-background">
-        <Outlet />
-      </main>
-    </div>
+        <Sidebar className="hidden md:flex">
+          <SidebarContent />
+        </Sidebar>
+
+        <main className="flex-1 overflow-y-auto bg-background">
+          <Outlet />
+        </main>
+      </div>
+    </SidebarProvider>
   );
 };
 
