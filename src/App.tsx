@@ -15,6 +15,7 @@ import FinanceiroIndex from "./pages/dashboard/admin/financeiro/Index";
 import FeriasIndex from "./pages/dashboard/admin/ferias/Index";
 import PunicoesIndex from "./pages/dashboard/admin/punicoes/Index";
 import RelatoriosIndex from "./pages/dashboard/admin/relatorios/Index";
+import CargosIndex from "./pages/dashboard/admin/cargos/Index";
 import SolicitacoesDoFuncionario from "./pages/dashboard/funcionarios/solicitacoes/Index";
 import Login from "./pages/auth/Login";
 import Cadastro from "./pages/auth/Cadastro";
@@ -55,6 +56,7 @@ const App = () => (
               <Route path="ferias" element={<FeriasIndex />} />
               <Route path="punicoes" element={<PunicoesIndex />} />
               <Route path="relatorios" element={<RelatoriosIndex />} />
+              <Route path="cargos" element={<CargosIndex />} />
             </Route>
 
             {/* Rotas de Funcionário */}
