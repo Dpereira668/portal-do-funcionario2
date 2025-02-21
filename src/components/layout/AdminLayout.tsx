@@ -46,7 +46,7 @@ const AdminLayout = () => {
       title: "Gestão de Férias",
       description: "Planejamento e aprovação de férias",
       icon: CalendarRange,
-      path: "/admin/gestao-ferias",
+      path: "/admin/ferias",
     },
     {
       title: "Lançamento de Faltas",
