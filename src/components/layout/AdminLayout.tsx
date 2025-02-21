@@ -18,7 +18,7 @@ import {
   UserCog,
   Building2,
   Shirt,
-  BadgeHelp,
+  Mail,
   ScrollText,
   PiggyBank,
 } from "lucide-react";
@@ -97,10 +97,10 @@ const AdminLayout = () => {
       path: "/admin/financeiro",
     },
     {
-      title: "Ajuda",
-      description: "Central de ajuda e suporte",
-      icon: BadgeHelp,
-      path: "/admin/faq",
+      title: "Convites",
+      description: "Gerenciar convites para administradores",
+      icon: Mail,
+      path: "/admin/convites",
     },
   ];
 
