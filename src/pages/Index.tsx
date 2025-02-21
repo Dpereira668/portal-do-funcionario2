@@ -20,31 +20,34 @@ const Index = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-2xl mx-auto">
-          <div className="group space-y-4 p-6 bg-white/50 rounded-lg border border-border/50 hover:border-primary/20 transition-all duration-300 hover:shadow-lg">
+          <div className="group space-y-4 p-6 bg-white/50 rounded-lg border border-border/50 hover:border-primary/20 transition-all duration-300 hover:shadow-lg order-2 md:order-1">
             <div className="w-16 h-16 bg-primary/5 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300">
               <Building2 className="w-8 h-8 text-primary" />
             </div>
             <Button 
+              variant="outline" 
               size="lg"
               onClick={() => navigate("/admin")}
-              className="w-full bg-primary hover:bg-primary/90"
+              className="w-full"
             >
               Área Administrativa
             </Button>
           </div>
 
-          <div className="group space-y-4 p-6 bg-white/50 rounded-lg border border-border/50 hover:border-primary/20 transition-all duration-300 hover:shadow-lg">
-            <div className="w-16 h-16 bg-primary/5 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300">
-              <Users className="w-8 h-8 text-primary" />
+          <div className="group space-y-4 p-8 bg-white rounded-lg border-2 border-primary shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 order-1 md:order-2">
+            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300">
+              <Users className="w-10 h-10 text-primary" />
             </div>
             <Button 
               size="lg"
               onClick={() => navigate("/funcionario")}
-              variant="outline"
-              className="w-full"
+              className="w-full bg-primary hover:bg-primary/90 text-lg"
             >
               Área do Funcionário
             </Button>
+            <p className="text-sm text-muted-foreground">
+              Acesse suas solicitações e documentos
+            </p>
           </div>
         </div>
       </div>
