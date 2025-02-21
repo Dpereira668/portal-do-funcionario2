@@ -14,18 +14,25 @@ const PrivateRoute = () => {
     queryKey: ['profile', user?.id],
     queryFn: async () => {
       if (!user) return null;
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
+      
+      if (error) {
+        console.error('Error fetching profile:', error);
+        return null;
+      }
       return data;
     },
-    enabled: !!user,
-    retry: false,
+    enabled: !!user && !authLoading,
+    retry: 1,
+    staleTime: Infinity,
   });
 
-  if (authLoading || (user && profileLoading)) {
+  // Show loading spinner while checking authentication
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
@@ -33,23 +40,31 @@ const PrivateRoute = () => {
     );
   }
 
+  // Redirect to login if not authenticated
   if (!user) {
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
 
-  const path = location.pathname;
-  const isAuthRoute = path === '/login' || path === '/cadastro';
-  const isAdminRoute = path.startsWith('/admin');
-  const isFuncionarioRoute = path.startsWith('/funcionario');
-
-  // Default role to 'funcionario' if profile is not loaded
-  const role = profile?.role ?? 'funcionario';
-
-  if (isAuthRoute) {
-    return <Navigate to={role === 'admin' ? '/admin/solicitacoes' : '/funcionario/solicitacoes'} replace />;
+  // Show loading spinner while fetching profile
+  if (profileLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
   }
 
-  if (isAdminRoute && role !== 'admin') {
+  const role = profile?.role ?? 'funcionario';
+  const path = location.pathname;
+
+  // Redirect from auth routes if already logged in
+  if (path === '/login' || path === '/cadastro') {
+    const redirectPath = role === 'admin' ? '/admin/solicitacoes' : '/funcionario/solicitacoes';
+    return <Navigate to={redirectPath} replace />;
+  }
+
+  // Handle admin route access
+  if (path.startsWith('/admin') && role !== 'admin') {
     toast({
       title: "Acesso negado",
       description: "Você não tem permissão para acessar a área administrativa",
@@ -58,7 +73,8 @@ const PrivateRoute = () => {
     return <Navigate to="/funcionario/solicitacoes" replace />;
   }
 
-  if (isFuncionarioRoute && role === 'admin') {
+  // Handle funcionario route access
+  if (path.startsWith('/funcionario') && role === 'admin') {
     return <Navigate to="/admin/solicitacoes" replace />;
   }
 
