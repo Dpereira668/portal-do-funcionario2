@@ -1,11 +1,6 @@
 
 import { Outlet } from "react-router-dom";
-import {
-  CalendarDays,
-  FileText,
-  ScrollText,
-  Home,
-} from "lucide-react";
+import { Home } from "lucide-react";
 import { Button } from "../ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 import { Sidebar, SidebarProvider } from "../ui/sidebar";
@@ -16,15 +11,6 @@ const SidebarContent = () => {
     <SidebarNav>
       <SidebarNavItem href="/" icon={Home}>
         Página Inicial
-      </SidebarNavItem>
-      <SidebarNavItem href="/funcionario/solicitacoes" icon={ScrollText}>
-        Solicitações
-      </SidebarNavItem>
-      <SidebarNavItem href="/funcionario/documentos" icon={FileText}>
-        Documentos
-      </SidebarNavItem>
-      <SidebarNavItem href="/funcionario/ferias" icon={CalendarDays}>
-        Férias
       </SidebarNavItem>
     </SidebarNav>
   );
