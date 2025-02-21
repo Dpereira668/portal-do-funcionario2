@@ -6,35 +6,34 @@ import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 
 const PrivateRoute = () => {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const location = useLocation();
   const { toast } = useToast();
 
-  const { data: profile, isLoading: isLoadingProfile } = useQuery({
+  const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ['profile', user?.id],
     queryFn: async () => {
       if (!user) return null;
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .maybeSingle();
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .maybeSingle();
 
-        if (error) throw error;
-        return data;
-      } catch (error) {
+      if (error) {
         console.error('Error fetching profile:', error);
         return null;
       }
+      return data;
     },
     enabled: !!user,
-    gcTime: 60000, // Keep in garbage collection for 1 minute
-    staleTime: 30000, // Consider data fresh for 30 seconds
+    gcTime: 60000,
+    staleTime: 30000,
+    retry: false,
   });
 
   // Handle initial loading state
-  if (loading || (user && isLoadingProfile)) {
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
@@ -42,36 +41,59 @@ const PrivateRoute = () => {
     );
   }
 
-  // If user is not authenticated, redirect to login
+  // If not authenticated, redirect to login
   if (!user) {
-    const from = location.pathname;
-    return <Navigate to="/login" state={{ from }} replace />;
+    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
 
-  const userRole = profile?.role || 'funcionario';
+  // If authenticated but profile is loading, show loading state
+  if (profileLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
+  }
+
+  const userRole = profile?.role;
   const path = location.pathname;
 
-  // Handle authentication routes when already logged in
+  // Handle auth routes when logged in
   if (path === '/login' || path === '/cadastro') {
+    if (!userRole) {
+      return <Navigate to="/funcionario/solicitacoes" replace />;
+    }
     return <Navigate to={userRole === 'admin' ? '/admin/solicitacoes' : '/funcionario/solicitacoes'} replace />;
   }
 
-  // Handle admin routes access
-  if (path.startsWith('/admin') && userRole !== 'admin') {
-    toast({
-      title: "Acesso negado",
-      description: "Você não tem permissão para acessar a área administrativa",
-      variant: "destructive",
-    });
-    return <Navigate to="/funcionario/solicitacoes" replace />;
+  // Handle role-based routing
+  if (!userRole) {
+    // If no role is set, default to funcionario routes
+    if (path.startsWith('/admin')) {
+      toast({
+        title: "Acesso negado",
+        description: "Você não tem permissão para acessar a área administrativa",
+        variant: "destructive",
+      });
+      return <Navigate to="/funcionario/solicitacoes" replace />;
+    }
+  } else {
+    // Handle admin routes
+    if (path.startsWith('/admin') && userRole !== 'admin') {
+      toast({
+        title: "Acesso negado",
+        description: "Você não tem permissão para acessar a área administrativa",
+        variant: "destructive",
+      });
+      return <Navigate to="/funcionario/solicitacoes" replace />;
+    }
+
+    // Handle funcionario routes
+    if (path.startsWith('/funcionario') && userRole === 'admin') {
+      return <Navigate to="/admin/solicitacoes" replace />;
+    }
   }
 
-  // Handle funcionario routes access for admin
-  if (path.startsWith('/funcionario') && userRole === 'admin') {
-    return <Navigate to="/admin/solicitacoes" replace />;
-  }
-
-  // Allow access to the route
   return <Outlet />;
 };
 
