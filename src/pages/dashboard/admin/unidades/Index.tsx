@@ -31,7 +31,7 @@ const UnidadesIndex = () => {
       <div className="p-8 space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h2 className="text-3xl font-bold text-primary">Unidades</h2>
+            <h2 className="text-3xl font-bold text-primary">Postos</h2>
             <p className="text-muted-foreground">
               Gestão de locais de trabalho
             </p>
@@ -40,7 +40,7 @@ const UnidadesIndex = () => {
             <DialogTrigger asChild>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
-                Nova Unidade
+                Novo Posto
               </Button>
             </DialogTrigger>
             <AddWorkplaceForm onSuccess={() => setIsAddDialogOpen(false)} />

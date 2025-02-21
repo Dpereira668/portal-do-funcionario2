@@ -96,7 +96,7 @@ const AdminLayout = () => {
       path: "/admin/cargos",
     },
     {
-      title: "Unidades",
+      title: "Postos",
       description: "Gestão de locais de trabalho",
       icon: Building2,
       path: "/admin/unidades",
