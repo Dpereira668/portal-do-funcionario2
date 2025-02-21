@@ -48,7 +48,7 @@ const PrivateRoute = () => {
   }, [profileQuery.data?.role]);
 
   // Handle loading states
-  if (authLoading || (!user && loading)) {
+  if (authLoading) {
     return <LoadingSpinner />;
   }
 
