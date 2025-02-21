@@ -43,8 +43,8 @@ const PrivateRoute = () => {
     refetchOnWindowFocus: false,
     refetchOnMount: true,
     refetchOnReconnect: false,
-    staleTime: 0, // Force a fresh fetch every time
-    cacheTime: 0  // Disable caching
+    staleTime: 0,
+    gcTime: 0 // Substituído cacheTime por gcTime
   });
 
   const role = profileQuery.data?.role;
