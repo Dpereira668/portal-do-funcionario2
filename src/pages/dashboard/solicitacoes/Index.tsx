@@ -1,17 +1,23 @@
 
+import { useState } from "react";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Calendar, FileText, Coffee, Shirt } from "lucide-react";
+import { Calendar, FileText, Coffee, Shirt, Check, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const SolicitacoesIndex = () => {
   const { toast } = useToast();
+  const [mostrarRespondidas, setMostrarRespondidas] = useState(false);
+
   const solicitacoes = [
     {
       id: 1,
@@ -51,14 +57,18 @@ const SolicitacoesIndex = () => {
     },
   ];
 
+  const solicitacoesFiltradas = mostrarRespondidas
+    ? solicitacoes.filter((s) => s.status !== "Pendente")
+    : solicitacoes;
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Aprovado":
-        return "text-green-600 bg-green-100";
+        return "text-green-600";
       case "Rejeitado":
-        return "text-red-600 bg-red-100";
+        return "text-red-600";
       default:
-        return "text-yellow-600 bg-yellow-100";
+        return "text-yellow-600";
     }
   };
 
@@ -77,34 +87,6 @@ const SolicitacoesIndex = () => {
     });
   };
 
-  const handleConfirmDelivery = async (id: number) => {
-    const solicitacao = solicitacoes.find(s => s.id === id);
-    if (!solicitacao) return;
-
-    try {
-      const { data: updatedRequest, error } = await supabase
-        .from('requests')
-        .update({
-          delivery_status: 'entregue',
-          delivery_date: new Date().toISOString(),
-        })
-        .eq('id', id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Entrega confirmada",
-        description: `A entrega do uniforme para ${solicitacao.funcionario} foi confirmada com sucesso.`,
-      });
-    } catch (error: any) {
-      toast({
-        title: "Erro ao confirmar entrega",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
   return (
     <div className="p-4 md:p-8 space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
@@ -114,63 +96,73 @@ const SolicitacoesIndex = () => {
             Gerencie as solicitações dos funcionários
           </p>
         </div>
+        <Button
+          variant="outline"
+          onClick={() => setMostrarRespondidas(!mostrarRespondidas)}
+          className="flex items-center gap-2"
+        >
+          <Check className="h-4 w-4" />
+          {mostrarRespondidas ? "Todas as solicitações" : "Solicitações respondidas"}
+        </Button>
       </div>
 
-      <div className="grid gap-4">
-        {solicitacoes.map((solicitacao) => (
-          <Card 
-            key={solicitacao.id} 
-            className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group"
-          >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <div className="flex items-center space-x-4">
-                <div className="p-2 bg-primary/5 rounded-full group-hover:bg-primary/10 transition-colors">
-                  <solicitacao.icon className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg font-medium">
+      <ScrollArea className="h-[calc(100vh-12rem)] border rounded-lg">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Tipo</TableHead>
+              <TableHead>Funcionário</TableHead>
+              <TableHead>Data</TableHead>
+              <TableHead>Detalhes</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {solicitacoesFiltradas.map((solicitacao) => (
+              <TableRow key={solicitacao.id}>
+                <TableCell className="font-medium">
+                  <div className="flex items-center gap-2">
+                    <solicitacao.icon className="h-4 w-4 text-primary" />
                     {solicitacao.tipo}
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    {solicitacao.funcionario} - {solicitacao.data}
-                  </p>
-                </div>
-              </div>
-              <span
-                className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${getStatusColor(
-                  solicitacao.status
-                )}`}
-              >
-                {solicitacao.status}
-              </span>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                {solicitacao.detalhes}
-              </p>
-              {solicitacao.status === "Pendente" && (
-                <div className="flex justify-end space-x-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="text-red-600 hover:bg-red-50 transition-colors"
-                    onClick={() => handleAction(solicitacao.id, 'rejeitar')}
-                  >
-                    Rejeitar
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    className="bg-green-600 hover:bg-green-700 transition-colors"
-                    onClick={() => handleAction(solicitacao.id, 'aprovar')}
-                  >
-                    Aprovar
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                  </div>
+                </TableCell>
+                <TableCell>{solicitacao.funcionario}</TableCell>
+                <TableCell>{solicitacao.data}</TableCell>
+                <TableCell>{solicitacao.detalhes}</TableCell>
+                <TableCell>
+                  <span className={`font-medium ${getStatusColor(solicitacao.status)}`}>
+                    {solicitacao.status}
+                  </span>
+                </TableCell>
+                <TableCell className="text-right">
+                  {solicitacao.status === "Pendente" && (
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-red-600 hover:bg-red-50"
+                        onClick={() => handleAction(solicitacao.id, 'rejeitar')}
+                      >
+                        <X className="h-4 w-4" />
+                        Rejeitar
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700"
+                        onClick={() => handleAction(solicitacao.id, 'aprovar')}
+                      >
+                        <Check className="h-4 w-4" />
+                        Aprovar
+                      </Button>
+                    </div>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </ScrollArea>
     </div>
   );
 };
