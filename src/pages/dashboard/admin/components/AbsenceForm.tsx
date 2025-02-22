@@ -1,6 +1,14 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { type JustificationType } from "../types/absences";
 
 interface AbsenceFormProps {
   coverageType: "standby" | "prestador";
@@ -35,6 +43,20 @@ export const AbsenceForm = ({
         <div className="space-y-2">
           <label className="text-sm font-medium">Data da Falta</label>
           <Input name="date" type="date" required />
+        </div>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Tipo de Justificativa</label>
+          <Select name="justification_type" defaultValue="sem_justificativa">
+            <SelectTrigger>
+              <SelectValue placeholder="Selecione o tipo de justificativa" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="sem_justificativa">Sem Justificativa</SelectItem>
+              <SelectItem value="atestado">Atestado Médico</SelectItem>
+              <SelectItem value="declaracao">Declaração</SelectItem>
+              <SelectItem value="suspensao">Suspensão</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div className="space-y-2">
           <label className="text-sm font-medium">Tipo de Cobertura</label>

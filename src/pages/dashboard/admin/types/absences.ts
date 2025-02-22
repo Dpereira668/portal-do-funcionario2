@@ -7,6 +7,8 @@ export interface BankInfo {
   pix: string;
 }
 
+export type JustificationType = "sem_justificativa" | "atestado" | "declaracao" | "suspensao";
+
 export interface Absence {
   id: string;
   employee_name: string;
@@ -22,4 +24,6 @@ export interface Absence {
   status: "pending" | "justified" | "unjustified";
   justification?: string;
   justification_file_url?: string;
+  justification_type: JustificationType;
+  suspension_id?: string;
 }

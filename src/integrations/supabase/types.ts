@@ -23,8 +23,10 @@ export type Database = {
           id: string
           justification: string | null
           justification_file_url: string | null
+          justification_type: string
           position_title: string
           status: string | null
+          suspension_id: string | null
           updated_at: string
           workplace: string
         }
@@ -41,8 +43,10 @@ export type Database = {
           id?: string
           justification?: string | null
           justification_file_url?: string | null
+          justification_type?: string
           position_title: string
           status?: string | null
+          suspension_id?: string | null
           updated_at?: string
           workplace: string
         }
@@ -59,12 +63,22 @@ export type Database = {
           id?: string
           justification?: string | null
           justification_file_url?: string | null
+          justification_type?: string
           position_title?: string
           status?: string | null
+          suspension_id?: string | null
           updated_at?: string
           workplace?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "absences_suspension_id_fkey"
+            columns: ["suspension_id"]
+            isOneToOne: false
+            referencedRelation: "punishments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       admin_invites: {
         Row: {
