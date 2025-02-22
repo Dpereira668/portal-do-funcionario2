@@ -74,6 +74,11 @@ export const useSolicitacaoForm = ({ onSuccess, tipoInicial }: UseSolicitacaoFor
     setLoading(true);
     try {
       if (novaSolicitacao.tipo === 'uniforme') {
+        // Validar itens do uniforme
+        if (novaSolicitacao.uniformeItens.some(item => !item.tipoUniforme || !item.tamanhoUniforme)) {
+          throw new Error("Preencha todos os campos do uniforme");
+        }
+
         const promises = novaSolicitacao.uniformeItens.map(item => 
           supabase.from('requests').insert({
             user_id: user.id,
@@ -92,6 +97,15 @@ export const useSolicitacaoForm = ({ onSuccess, tipoInicial }: UseSolicitacaoFor
           throw errors[0].error;
         }
       } else {
+        // Validar campos específicos para cada tipo de solicitação
+        if (novaSolicitacao.tipo === 'adiantamento' && !novaSolicitacao.advance_reason) {
+          throw new Error("Informe o motivo do adiantamento");
+        }
+
+        if ((novaSolicitacao.tipo === 'ferias' || novaSolicitacao.tipo === 'documento') && !novaSolicitacao.dataInicio) {
+          throw new Error("Selecione a data de início");
+        }
+
         const { error } = await supabase.from('requests').insert({
           user_id: user.id,
           type: novaSolicitacao.tipo,
@@ -116,7 +130,7 @@ export const useSolicitacaoForm = ({ onSuccess, tipoInicial }: UseSolicitacaoFor
     } catch (error: any) {
       toast({
         title: "Erro ao enviar solicitação",
-        description: error.message,
+        description: error.message || "Ocorreu um erro ao enviar sua solicitação. Tente novamente.",
         variant: "destructive",
       });
     } finally {

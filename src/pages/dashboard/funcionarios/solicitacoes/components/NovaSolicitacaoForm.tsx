@@ -41,12 +41,12 @@ const NovaSolicitacaoForm = ({ onSuccess, tipoInicial }: NovaSolicitacaoFormProp
           <Card className="p-4">
             <CardContent className="space-y-4 p-0">
               <div className="space-y-2">
-                <Label htmlFor="nome">Nome</Label>
+                <Label htmlFor="nome">Nome Completo</Label>
                 <div className="relative">
                   <User className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="nome"
-                    placeholder="Seu nome completo"
+                    placeholder="Digite seu nome completo"
                     className="pl-8"
                     value={formData.nome}
                     onChange={(e) => handleInputChange('nome', e.target.value)}
@@ -76,7 +76,7 @@ const NovaSolicitacaoForm = ({ onSuccess, tipoInicial }: NovaSolicitacaoFormProp
                   <UserCog className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="funcao"
-                    placeholder="Sua função"
+                    placeholder="Digite sua função"
                     className="pl-8"
                     value={formData.funcao}
                     onChange={(e) => handleInputChange('funcao', e.target.value)}
@@ -86,12 +86,12 @@ const NovaSolicitacaoForm = ({ onSuccess, tipoInicial }: NovaSolicitacaoFormProp
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="posto">Posto</Label>
+                <Label htmlFor="posto">Local de Trabalho</Label>
                 <div className="relative">
                   <MapPin className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="posto"
-                    placeholder="Seu posto"
+                    placeholder="Digite seu local de trabalho"
                     className="pl-8"
                     value={formData.posto}
                     onChange={(e) => handleInputChange('posto', e.target.value)}
@@ -101,7 +101,7 @@ const NovaSolicitacaoForm = ({ onSuccess, tipoInicial }: NovaSolicitacaoFormProp
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">E-mail</Label>
                 <div className="relative">
                   <Mail className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -148,7 +148,7 @@ const NovaSolicitacaoForm = ({ onSuccess, tipoInicial }: NovaSolicitacaoFormProp
               className="w-full p-2 border rounded-md min-h-[100px]"
               value={novaSolicitacao.observacoes}
               onChange={(e) => handleChange("observacoes", e.target.value)}
-              placeholder="Adicione observações importantes sobre sua solicitação..."
+              placeholder="Adicione informações importantes sobre sua solicitação..."
             />
           </div>
         </div>
