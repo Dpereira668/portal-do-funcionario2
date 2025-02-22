@@ -20,6 +20,7 @@ import UnidadesIndex from "./pages/dashboard/admin/unidades/Index";
 import ConvitesIndex from "./pages/dashboard/admin/convites/Index";
 import SolicitacoesDoFuncionario from "./pages/dashboard/funcionarios/solicitacoes/Index";
 import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
 import PrivateRoute from "./components/PrivateRoute";
 import { AuthProvider } from "./contexts/AuthContext";
 
@@ -41,6 +42,7 @@ const App = () => (
           {/* Rotas Públicas */}
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
           {/* Rotas de Funcionário (Sem autenticação) */}
           <Route path="/funcionario" element={<FuncionarioLayout />}>
