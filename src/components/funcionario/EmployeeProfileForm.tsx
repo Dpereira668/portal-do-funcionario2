@@ -40,6 +40,11 @@ export const EmployeeProfileForm = () => {
       setProfile(data);
     } catch (error: any) {
       console.error("Error fetching profile:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao carregar perfil",
+        description: "Por favor, tente novamente mais tarde.",
+      });
     } finally {
       setLoading(false);
     }
@@ -49,15 +54,16 @@ export const EmployeeProfileForm = () => {
     e.preventDefault();
     if (!user) return;
 
-    const formData = new FormData(e.currentTarget);
-    const updates = {
-      name: formData.get("name"),
-      cpf: formData.get("cpf"),
-      position_title: formData.get("position_title"),
-      workplace: formData.get("workplace"),
-    };
-
     try {
+      const formData = new FormData(e.currentTarget);
+      const updates = {
+        name: formData.get("name"),
+        cpf: formData.get("cpf"),
+        position_title: formData.get("position_title"),
+        workplace: formData.get("workplace"),
+        updated_at: new Date().toISOString(),
+      };
+
       const { error } = await supabase
         .from("profiles")
         .update(updates)
@@ -70,12 +76,13 @@ export const EmployeeProfileForm = () => {
         description: "Suas informações foram atualizadas com sucesso.",
       });
       setEditing(false);
-      fetchProfile();
+      await fetchProfile();
     } catch (error: any) {
+      console.error("Error updating profile:", error);
       toast({
         variant: "destructive",
         title: "Erro ao atualizar perfil",
-        description: "Por favor, tente novamente.",
+        description: "Por favor, tente novamente mais tarde.",
       });
     }
   };

@@ -88,81 +88,87 @@ const SolicitacoesIndex = () => {
   };
 
   return (
-    <div className="p-4 md:p-8 space-y-6 animate-fade-in">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-3xl font-bold text-primary">Solicitações</h2>
-          <p className="text-muted-foreground">
-            Gerencie as solicitações dos funcionários
-          </p>
+    <div className="h-[calc(100vh-4rem)] flex flex-col">
+      <div className="p-6 space-y-6 flex-1 overflow-hidden">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h2 className="text-3xl font-bold text-primary">Solicitações</h2>
+            <p className="text-muted-foreground">
+              Gerencie as solicitações dos funcionários
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => setMostrarRespondidas(!mostrarRespondidas)}
+            className="flex items-center gap-2"
+          >
+            <Check className="h-4 w-4" />
+            {mostrarRespondidas ? "Todas as solicitações" : "Solicitações respondidas"}
+          </Button>
         </div>
-        <Button
-          variant="outline"
-          onClick={() => setMostrarRespondidas(!mostrarRespondidas)}
-          className="flex items-center gap-2"
-        >
-          <Check className="h-4 w-4" />
-          {mostrarRespondidas ? "Todas as solicitações" : "Solicitações respondidas"}
-        </Button>
-      </div>
 
-      <ScrollArea className="h-[calc(100vh-12rem)] border rounded-lg">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Tipo</TableHead>
-              <TableHead>Funcionário</TableHead>
-              <TableHead>Data</TableHead>
-              <TableHead>Detalhes</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {solicitacoesFiltradas.map((solicitacao) => (
-              <TableRow key={solicitacao.id}>
-                <TableCell className="font-medium">
-                  <div className="flex items-center gap-2">
-                    <solicitacao.icon className="h-4 w-4 text-primary" />
-                    {solicitacao.tipo}
-                  </div>
-                </TableCell>
-                <TableCell>{solicitacao.funcionario}</TableCell>
-                <TableCell>{solicitacao.data}</TableCell>
-                <TableCell>{solicitacao.detalhes}</TableCell>
-                <TableCell>
-                  <span className={`font-medium ${getStatusColor(solicitacao.status)}`}>
-                    {solicitacao.status}
-                  </span>
-                </TableCell>
-                <TableCell className="text-right">
-                  {solicitacao.status === "Pendente" && (
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-red-600 hover:bg-red-50"
-                        onClick={() => handleAction(solicitacao.id, 'rejeitar')}
-                      >
-                        <X className="h-4 w-4" />
-                        Rejeitar
-                      </Button>
-                      <Button
-                        size="sm"
-                        className="bg-green-600 hover:bg-green-700"
-                        onClick={() => handleAction(solicitacao.id, 'aprovar')}
-                      >
-                        <Check className="h-4 w-4" />
-                        Aprovar
-                      </Button>
-                    </div>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </ScrollArea>
+        <div className="border rounded-lg overflow-hidden h-[calc(100vh-12rem)]">
+          <ScrollArea className="h-full">
+            <Table>
+              <TableHeader className="sticky top-0 bg-background z-10 shadow-sm">
+                <TableRow>
+                  <TableHead className="w-[200px]">Tipo</TableHead>
+                  <TableHead className="w-[200px]">Funcionário</TableHead>
+                  <TableHead className="w-[120px]">Data</TableHead>
+                  <TableHead className="min-w-[300px]">Detalhes</TableHead>
+                  <TableHead className="w-[120px]">Status</TableHead>
+                  <TableHead className="w-[200px] text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {solicitacoesFiltradas.map((solicitacao) => (
+                  <TableRow key={solicitacao.id} className="hover:bg-muted/50">
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        <solicitacao.icon className="h-4 w-4 text-primary" />
+                        {solicitacao.tipo}
+                      </div>
+                    </TableCell>
+                    <TableCell>{solicitacao.funcionario}</TableCell>
+                    <TableCell>{solicitacao.data}</TableCell>
+                    <TableCell className="max-w-[300px] truncate">
+                      {solicitacao.detalhes}
+                    </TableCell>
+                    <TableCell>
+                      <span className={`font-medium ${getStatusColor(solicitacao.status)}`}>
+                        {solicitacao.status}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {solicitacao.status === "Pendente" && (
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-red-600 hover:bg-red-50"
+                            onClick={() => handleAction(solicitacao.id, 'rejeitar')}
+                          >
+                            <X className="h-4 w-4 mr-1" />
+                            Rejeitar
+                          </Button>
+                          <Button
+                            size="sm"
+                            className="bg-green-600 hover:bg-green-700"
+                            onClick={() => handleAction(solicitacao.id, 'aprovar')}
+                          >
+                            <Check className="h-4 w-4 mr-1" />
+                            Aprovar
+                          </Button>
+                        </div>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ScrollArea>
+        </div>
+      </div>
     </div>
   );
 };
