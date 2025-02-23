@@ -2,12 +2,9 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Building2, Users } from "lucide-react";
-import { EmployeeProfileForm } from "@/components/funcionario/EmployeeProfileForm";
-import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5 flex flex-col items-center justify-center p-4">
@@ -54,8 +51,6 @@ const Index = () => {
           </div>
         </div>
       </div>
-
-      {user && <EmployeeProfileForm />}
     </div>
   );
 };

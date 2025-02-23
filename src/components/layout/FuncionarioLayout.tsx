@@ -1,16 +1,21 @@
 
 import { Outlet } from "react-router-dom";
-import { Home } from "lucide-react";
+import { Home, User } from "lucide-react";
 import { Button } from "../ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 import { Sidebar, SidebarProvider } from "../ui/sidebar";
 import { SidebarNav, SidebarNavItem } from "../ui/SidebarNav";
+import { EmployeeProfileForm } from "../funcionario/EmployeeProfileForm";
+import { ScrollArea } from "../ui/scroll-area";
 
 const SidebarContent = () => {
   return (
     <SidebarNav>
       <SidebarNavItem href="/" icon={Home}>
         Página Inicial
+      </SidebarNavItem>
+      <SidebarNavItem href="/funcionario/perfil" icon={User}>
+        Meu Perfil
       </SidebarNavItem>
     </SidebarNav>
   );
@@ -41,8 +46,15 @@ const FuncionarioLayout = () => {
           <SidebarContent />
         </Sidebar>
 
-        <main className="flex-1 overflow-y-auto bg-background">
-          <Outlet />
+        <main className="flex-1 overflow-y-auto bg-background p-4">
+          <ScrollArea className="h-full">
+            <div className="container max-w-5xl mx-auto">
+              <EmployeeProfileForm />
+              <div className="mt-6">
+                <Outlet />
+              </div>
+            </div>
+          </ScrollArea>
         </main>
       </div>
     </SidebarProvider>
