@@ -1,43 +1,15 @@
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { FileText, Plus, Upload } from "lucide-react";
+import { Plus, Upload } from "lucide-react";
 import { useState } from "react";
-import { AVAILABLE_POSITIONS } from "@/constants/positions";
-
-interface Employee {
-  id: string;
-  cpf: string;
-  name: string;
-  email: string;
-  phone: string;
-  position_id: string;
-  workplace: string;
-  address: string;
-  birth_date: string;
-  admission_date: string;
-  status: string;
-  position_title?: string;
-}
+import { EmployeeCard } from "./components/EmployeeCard";
+import { RegistrationRequestCard } from "./components/RegistrationRequestCard";
+import { AddEmployeeDialog } from "./components/AddEmployeeDialog";
 
 const GestaoFuncionarios = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -305,64 +277,7 @@ const GestaoFuncionarios = () => {
                   Adicionar Funcionário
                 </Button>
               </DialogTrigger>
-              <DialogContent>
-                <ScrollArea className="max-h-[80vh]">
-                  <DialogHeader>
-                    <DialogTitle>Adicionar Funcionário</DialogTitle>
-                    <DialogDescription>
-                      Preencha os dados do novo funcionário
-                    </DialogDescription>
-                  </DialogHeader>
-                  <form onSubmit={handleAddEmployee} className="space-y-4 p-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Nome</label>
-                      <Input name="name" required />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Email</label>
-                      <Input name="email" type="email" required />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">CPF</label>
-                      <Input name="cpf" required pattern="\d{11}" maxLength={11} />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Telefone</label>
-                      <Input name="phone" required />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Endereço</label>
-                      <Input name="address" required />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Data de Nascimento</label>
-                      <Input name="birth_date" type="date" required />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Data de Admissão</label>
-                      <Input name="admission_date" type="date" required />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Cargo</label>
-                      <select name="position" className="w-full p-2 border rounded-md" required>
-                        <option value="">Selecione um cargo</option>
-                        {AVAILABLE_POSITIONS.map((position) => (
-                          <option key={position} value={position}>
-                            {position}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Local de Trabalho</label>
-                      <Input name="workplace" required />
-                    </div>
-                    <Button type="submit" className="w-full">
-                      Adicionar
-                    </Button>
-                  </form>
-                </ScrollArea>
-              </DialogContent>
+              <AddEmployeeDialog onSubmit={handleAddEmployee} />
             </Dialog>
           </div>
         </div>
@@ -372,40 +287,12 @@ const GestaoFuncionarios = () => {
             <h3 className="text-xl font-semibold mb-4">Solicitações de Cadastro Pendentes</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {registrationRequests.map((request) => (
-                <Card key={request.id}>
-                  <CardHeader>
-                    <CardTitle>{request.name}</CardTitle>
-                    <CardDescription>CPF: {request.cpf}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <p className="text-sm">
-                        <strong>Email:</strong> {request.email}
-                      </p>
-                      <p className="text-sm">
-                        <strong>Telefone:</strong> {request.phone}
-                      </p>
-                      <p className="text-sm">
-                        <strong>Cargo Desejado:</strong> {request.position_title}
-                      </p>
-                      <div className="flex gap-2 mt-4">
-                        <Button
-                          size="sm"
-                          onClick={() => handleApproveRequest(request)}
-                        >
-                          Aprovar
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleRejectRequest(request.id)}
-                        >
-                          Rejeitar
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <RegistrationRequestCard
+                  key={request.id}
+                  request={request}
+                  onApprove={handleApproveRequest}
+                  onReject={handleRejectRequest}
+                />
               ))}
             </div>
           </div>
@@ -413,34 +300,7 @@ const GestaoFuncionarios = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {employees?.map((employee) => (
-            <Card key={employee.id}>
-              <CardHeader>
-                <CardTitle>{employee.name}</CardTitle>
-                <CardDescription>CPF: {employee.cpf}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <p className="text-sm">
-                    <strong>Email:</strong> {employee.email}
-                  </p>
-                  <p className="text-sm">
-                    <strong>Telefone:</strong> {employee.phone}
-                  </p>
-                  <p className="text-sm">
-                    <strong>Cargo:</strong> {employee.position_title}
-                  </p>
-                  <p className="text-sm">
-                    <strong>Local:</strong> {employee.workplace}
-                  </p>
-                  <div className="flex justify-end mt-4">
-                    <Button variant="outline" size="sm">
-                      <FileText className="h-4 w-4 mr-2" />
-                      Ver Detalhes
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <EmployeeCard key={employee.id} employee={employee} />
           ))}
         </div>
       </div>
