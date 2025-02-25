@@ -23,6 +23,7 @@ import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import PrivateRoute from "./components/PrivateRoute";
 import { AuthProvider } from "./contexts/AuthContext";
+import { AccessibilityAssistant } from "./components/AccessibilityAssistant";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,6 +39,7 @@ const App = () => (
     <AuthProvider>
       <QueryClientProvider client={queryClient}>
         <Toaster />
+        <AccessibilityAssistant />
         <Routes>
           {/* Rotas Públicas */}
           <Route path="/" element={<Index />} />
