@@ -17,7 +17,16 @@ export const AccessibilityAssistant = () => {
 
   const readText = async (text: string) => {
     try {
+      if (isPlaying) {
+        stopReading();
+        return;
+      }
+
       setIsPlaying(true);
+      toast({
+        title: "Iniciando leitura",
+        description: "Preparando para ler o conteúdo...",
+      });
 
       const { data, error } = await supabase.functions.invoke<TTSResponse>('text-to-speech', {
         body: { text, voice: 'onyx' }
@@ -31,24 +40,28 @@ export const AccessibilityAssistant = () => {
       const blob = await fetch(`data:audio/mp3;base64,${data.audioContent}`).then(r => r.blob());
       const url = URL.createObjectURL(blob);
 
-      // Stop any current audio
+      // Stop any current audio and clean up
       audio.pause();
+      if (audio.src) {
+        URL.revokeObjectURL(audio.src);
+      }
       audio.src = url;
-
-      // Clean up old blob URL
-      const oldUrl = audio.src;
-      audio.onloadeddata = () => {
-        if (oldUrl.startsWith('blob:')) {
-          URL.revokeObjectURL(oldUrl);
-        }
-      };
 
       // Play new audio
       await audio.play();
       
+      toast({
+        title: "Leitura iniciada",
+        description: "O conteúdo está sendo lido...",
+      });
+
       audio.onended = () => {
         setIsPlaying(false);
         URL.revokeObjectURL(url);
+        toast({
+          title: "Leitura finalizada",
+          description: "A leitura do conteúdo foi concluída",
+        });
       };
 
     } catch (error) {
@@ -64,7 +77,12 @@ export const AccessibilityAssistant = () => {
 
   const stopReading = () => {
     audio.pause();
+    audio.currentTime = 0;
     setIsPlaying(false);
+    toast({
+      title: "Leitura interrompida",
+      description: "A leitura foi interrompida",
+    });
   };
 
   const handleClick = () => {
@@ -76,9 +94,24 @@ export const AccessibilityAssistant = () => {
     // Get visible text content from the main content area
     const mainContent = document.querySelector('main');
     if (mainContent) {
-      const text = mainContent.textContent?.trim();
-      if (text) {
-        readText(text);
+      const visibleText = Array.from(mainContent.querySelectorAll('*'))
+        .filter((element: Element) => {
+          const style = window.getComputedStyle(element);
+          return style.display !== 'none' && 
+                 style.visibility !== 'hidden' && 
+                 element.textContent?.trim();
+        })
+        .map(element => element.textContent)
+        .join(' ')
+        .trim();
+
+      if (visibleText) {
+        readText(visibleText);
+      } else {
+        toast({
+          title: "Sem conteúdo",
+          description: "Não há conteúdo visível para ler nesta página",
+        });
       }
     }
   };
@@ -87,11 +120,13 @@ export const AccessibilityAssistant = () => {
     <Button
       variant="outline"
       size="icon"
-      className="fixed bottom-4 right-4 h-12 w-12 rounded-full shadow-lg hover:shadow-xl transition-all"
+      className="fixed bottom-20 right-4 h-12 w-12 rounded-full bg-white shadow-lg hover:shadow-xl transition-all z-50"
       onClick={handleClick}
       title={isPlaying ? "Parar leitura" : "Ler conteúdo"}
+      aria-label={isPlaying ? "Parar leitura" : "Ler conteúdo"}
     >
       {isPlaying ? <VolumeX className="h-6 w-6" /> : <Volume2 className="h-6 w-6" />}
     </Button>
   );
 };
+
