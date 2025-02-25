@@ -28,12 +28,19 @@ export const AccessibilityAssistant = () => {
         description: "Preparando para ler o conteúdo...",
       });
 
+      console.log('Enviando texto para conversão:', text.substring(0, 100) + '...');
+
       const { data, error } = await supabase.functions.invoke<TTSResponse>('text-to-speech', {
-        body: { text, voice: 'onyx' }
+        body: { 
+          text, 
+          voice: 'onyx' 
+        }
       });
 
+      console.log('Resposta da função:', { data, error });
+
       if (error || !data?.audioContent) {
-        throw new Error(error?.message || 'Falha ao gerar áudio');
+        throw new Error(error?.message || data?.error || 'Falha ao gerar áudio');
       }
 
       // Convert base64 to blob URL
@@ -68,7 +75,7 @@ export const AccessibilityAssistant = () => {
       console.error('Erro ao reproduzir texto:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível reproduzir o texto no momento",
+        description: error.message || "Não foi possível reproduzir o texto no momento",
         variant: "destructive",
       });
       setIsPlaying(false);
@@ -129,4 +136,3 @@ export const AccessibilityAssistant = () => {
     </Button>
   );
 };
-
