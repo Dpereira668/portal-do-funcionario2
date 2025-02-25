@@ -2,63 +2,62 @@
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { Calendar, FileText, PiggyBank, Shirt } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface SolicitacoesBotoesProps {
   onSolicitacaoClick: (tipo: string) => void;
 }
 
 const SolicitacoesBotoes = ({ onSolicitacaoClick }: SolicitacoesBotoesProps) => {
+  const isMobile = useIsMobile();
+
+  const buttons = [
+    {
+      tipo: 'uniforme',
+      texto: 'Solicitar Uniforme',
+      icone: Shirt,
+      cor: 'bg-[#8B5CF6] hover:bg-[#7C3AED]'
+    },
+    {
+      tipo: 'ferias',
+      texto: 'Solicitar Férias',
+      icone: Calendar,
+      cor: 'bg-[#F97316] hover:bg-[#EA580C]'
+    },
+    {
+      tipo: 'documento',
+      texto: 'Solicitar Documento',
+      icone: FileText,
+      cor: 'bg-[#0EA5E9] hover:bg-[#0284C7]'
+    },
+    {
+      tipo: 'adiantamento',
+      texto: 'Solicitar Adiantamento',
+      icone: PiggyBank,
+      cor: 'bg-[#10B981] hover:bg-[#059669]'
+    }
+  ];
+
   return (
-    <div className="grid grid-cols-2 gap-3 p-2 sm:p-0 sm:gap-4 lg:grid-cols-4">
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button 
-            onClick={() => onSolicitacaoClick('uniforme')}
-            className="w-full h-[80px] sm:h-auto flex-col sm:flex-row gap-2 sm:gap-3 bg-[#8B5CF6] hover:bg-[#7C3AED] transition-colors"
-          >
-            <Shirt className="h-6 w-6 sm:h-5 sm:w-5" />
-            <span className="text-center text-sm sm:text-base">Solicitar Uniforme</span>
-          </Button>
-        </SheetTrigger>
-      </Sheet>
-
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button 
-            onClick={() => onSolicitacaoClick('ferias')}
-            className="w-full h-[80px] sm:h-auto flex-col sm:flex-row gap-2 sm:gap-3 bg-[#F97316] hover:bg-[#EA580C] transition-colors"
-          >
-            <Calendar className="h-6 w-6 sm:h-5 sm:w-5" />
-            <span className="text-center text-sm sm:text-base">Solicitar Férias</span>
-          </Button>
-        </SheetTrigger>
-      </Sheet>
-
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button 
-            onClick={() => onSolicitacaoClick('documento')}
-            className="w-full h-[80px] sm:h-auto flex-col sm:flex-row gap-2 sm:gap-3 bg-[#0EA5E9] hover:bg-[#0284C7] transition-colors"
-          >
-            <FileText className="h-6 w-6 sm:h-5 sm:w-5" />
-            <span className="text-center text-sm sm:text-base">Solicitar Documento</span>
-          </Button>
-        </SheetTrigger>
-      </Sheet>
-
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button 
-            onClick={() => onSolicitacaoClick('adiantamento')}
-            className="w-full h-[80px] sm:h-auto flex-col sm:flex-row gap-2 sm:gap-3 bg-[#10B981] hover:bg-[#059669] transition-colors"
-          >
-            <PiggyBank className="h-6 w-6 sm:h-5 sm:w-5" />
-            <span className="text-center text-sm sm:text-base">Solicitar Adiantamento</span>
-          </Button>
-        </SheetTrigger>
-      </Sheet>
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 px-4 md:px-0">
+      {buttons.map((button) => (
+        <Sheet key={button.tipo}>
+          <SheetTrigger asChild>
+            <Button 
+              onClick={() => onSolicitacaoClick(button.tipo)}
+              className={`w-full h-[80px] md:h-auto flex-col md:flex-row gap-2 md:gap-3 transition-colors ${button.cor}`}
+            >
+              <button.icone className="h-6 w-6 md:h-5 md:w-5" />
+              <span className="text-center text-sm md:text-base">
+                {isMobile ? button.texto.split(' ')[1] : button.texto}
+              </span>
+            </Button>
+          </SheetTrigger>
+        </Sheet>
+      ))}
     </div>
   );
 };
 
 export default SolicitacoesBotoes;
+
