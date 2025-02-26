@@ -32,6 +32,7 @@ export const useSolicitacaoForm = ({ onSuccess, tipoInicial }: UseSolicitacaoFor
   });
 
   const handleChange = (field: string, value: any) => {
+    console.log(`Campo atualizado: ${field}`, value);
     setNovaSolicitacao((prev) => ({
       ...prev,
       [field]: value,
@@ -39,6 +40,7 @@ export const useSolicitacaoForm = ({ onSuccess, tipoInicial }: UseSolicitacaoFor
   };
 
   const resetForm = () => {
+    console.log("Formulário resetado");
     setNovaSolicitacao({
       tipo: "",
       dataInicio: "",
@@ -54,6 +56,7 @@ export const useSolicitacaoForm = ({ onSuccess, tipoInicial }: UseSolicitacaoFor
     e.preventDefault();
     
     if (!user) {
+      console.error("Tentativa de submissão sem usuário autenticado");
       toast({
         title: "Erro na solicitação",
         description: "Usuário não autenticado.",
@@ -63,6 +66,7 @@ export const useSolicitacaoForm = ({ onSuccess, tipoInicial }: UseSolicitacaoFor
     }
 
     if (!novaSolicitacao.tipo) {
+      console.error("Tentativa de submissão sem tipo de solicitação");
       toast({
         title: "Erro na solicitação",
         description: "Por favor, selecione o tipo de solicitação.",
@@ -70,6 +74,12 @@ export const useSolicitacaoForm = ({ onSuccess, tipoInicial }: UseSolicitacaoFor
       });
       return;
     }
+
+    console.log("Iniciando submissão de solicitação:", {
+      tipo: novaSolicitacao.tipo,
+      userId: user.id,
+      dados: novaSolicitacao
+    });
 
     setLoading(true);
     try {
@@ -79,6 +89,7 @@ export const useSolicitacaoForm = ({ onSuccess, tipoInicial }: UseSolicitacaoFor
           throw new Error("Preencha todos os campos do uniforme");
         }
 
+        console.log("Processando solicitação de uniforme:", novaSolicitacao.uniformeItens);
         const promises = novaSolicitacao.uniformeItens.map(item => 
           supabase.from('requests').insert({
             user_id: user.id,
@@ -94,19 +105,29 @@ export const useSolicitacaoForm = ({ onSuccess, tipoInicial }: UseSolicitacaoFor
         const errors = results.filter(result => result.error);
 
         if (errors.length > 0) {
+          console.error("Erros ao processar solicitações de uniforme:", errors);
           throw errors[0].error;
         }
+
+        console.log("Solicitações de uniforme processadas com sucesso:", results);
       } else {
         // Validar campos específicos para cada tipo de solicitação
         if (novaSolicitacao.tipo === 'adiantamento' && !novaSolicitacao.advance_reason) {
+          console.error("Tentativa de solicitar adiantamento sem motivo");
           throw new Error("Informe o motivo do adiantamento");
         }
 
         if ((novaSolicitacao.tipo === 'ferias' || novaSolicitacao.tipo === 'documento') && !novaSolicitacao.dataInicio) {
+          console.error("Tentativa de solicitar férias/documento sem data de início");
           throw new Error("Selecione a data de início");
         }
 
-        const { error } = await supabase.from('requests').insert({
+        console.log("Processando solicitação genérica:", {
+          tipo: novaSolicitacao.tipo,
+          dados: novaSolicitacao
+        });
+
+        const { data, error } = await supabase.from('requests').insert({
           user_id: user.id,
           type: novaSolicitacao.tipo,
           start_date: novaSolicitacao.dataInicio,
@@ -116,7 +137,12 @@ export const useSolicitacaoForm = ({ onSuccess, tipoInicial }: UseSolicitacaoFor
           advance_reason: novaSolicitacao.tipo === 'adiantamento' ? novaSolicitacao.advance_reason : null,
         });
 
-        if (error) throw error;
+        if (error) {
+          console.error("Erro ao processar solicitação:", error);
+          throw error;
+        }
+
+        console.log("Solicitação processada com sucesso:", data);
       }
 
       toast({
@@ -128,6 +154,7 @@ export const useSolicitacaoForm = ({ onSuccess, tipoInicial }: UseSolicitacaoFor
       queryClient.invalidateQueries({ queryKey: ['solicitacoes'] });
       onSuccess();
     } catch (error: any) {
+      console.error("Erro fatal ao processar solicitação:", error);
       toast({
         title: "Erro ao enviar solicitação",
         description: error.message || "Ocorreu um erro ao enviar sua solicitação. Tente novamente.",
@@ -135,6 +162,7 @@ export const useSolicitacaoForm = ({ onSuccess, tipoInicial }: UseSolicitacaoFor
       });
     } finally {
       setLoading(false);
+      console.log("Processamento de solicitação finalizado");
     }
   };
 
@@ -145,3 +173,4 @@ export const useSolicitacaoForm = ({ onSuccess, tipoInicial }: UseSolicitacaoFor
     handleSubmit,
   };
 };
+
