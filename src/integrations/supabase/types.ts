@@ -283,10 +283,10 @@ export type Database = {
           name: string | null
           phone: string | null
           position_id: string | null
-          role: string | null
-          status: string | null
+          role: string
+          status: string
           updated_at: string
-          user_type: Database["public"]["Enums"]["user_type"] | null
+          user_type: Database["public"]["Enums"]["user_type"]
           workplace_id: string | null
         }
         Insert: {
@@ -302,10 +302,10 @@ export type Database = {
           name?: string | null
           phone?: string | null
           position_id?: string | null
-          role?: string | null
-          status?: string | null
+          role: string
+          status?: string
           updated_at?: string
-          user_type?: Database["public"]["Enums"]["user_type"] | null
+          user_type?: Database["public"]["Enums"]["user_type"]
           workplace_id?: string | null
         }
         Update: {
@@ -321,10 +321,10 @@ export type Database = {
           name?: string | null
           phone?: string | null
           position_id?: string | null
-          role?: string | null
-          status?: string | null
+          role?: string
+          status?: string
           updated_at?: string
-          user_type?: Database["public"]["Enums"]["user_type"] | null
+          user_type?: Database["public"]["Enums"]["user_type"]
           workplace_id?: string | null
         }
         Relationships: [
