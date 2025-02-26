@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Volume2, VolumeX } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
+import { useAuthCheck } from '@/hooks/use-auth-check';
 
 interface TTSResponse {
   audioContent: string;
@@ -14,9 +15,19 @@ export const AccessibilityAssistant = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [audio] = useState(new Audio());
   const { toast } = useToast();
+  const { isAuthenticated, isLoading } = useAuthCheck();
 
   const readText = async (text: string) => {
     try {
+      if (!isAuthenticated) {
+        toast({
+          title: "Não autenticado",
+          description: "Você precisa estar logado para usar esta funcionalidade",
+          variant: "destructive",
+        });
+        return;
+      }
+
       if (isPlaying) {
         stopReading();
         return;
@@ -93,6 +104,23 @@ export const AccessibilityAssistant = () => {
   };
 
   const handleClick = () => {
+    if (isLoading) {
+      toast({
+        title: "Carregando",
+        description: "Aguarde enquanto verificamos sua autenticação",
+      });
+      return;
+    }
+
+    if (!isAuthenticated) {
+      toast({
+        title: "Não autenticado",
+        description: "Você precisa estar logado para usar esta funcionalidade",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (isPlaying) {
       stopReading();
       return;
@@ -136,3 +164,4 @@ export const AccessibilityAssistant = () => {
     </Button>
   );
 };
+
