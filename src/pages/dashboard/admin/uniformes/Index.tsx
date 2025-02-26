@@ -9,19 +9,28 @@ import { Plus, FileDown } from "lucide-react";
 import { AddUniformForm } from "./components/AddUniformForm";
 import { UniformCard } from "./components/UniformCard";
 import { Uniform } from "./types";
+import { usePagination } from "@/hooks/usePagination";
 
 const UniformesIndex = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const pagination = usePagination({ pageSize: 9 });
 
   const { data: uniforms, isLoading } = useQuery({
-    queryKey: ['uniforms'],
+    queryKey: ['uniforms', pagination.currentPage],
     queryFn: async () => {
+      const { start, end } = pagination.getRange();
       const { data, error } = await supabase
         .from('uniforms')
         .select('*')
-        .order('type', { ascending: true });
+        .order('type', { ascending: true })
+        .range(start, end);
 
       if (error) throw error;
+      
+      if (data) {
+        pagination.updateHasMore(data.length);
+      }
+      
       return data as Uniform[];
     }
   });
@@ -80,6 +89,23 @@ const UniformesIndex = () => {
           ) : uniforms?.map((uniform) => (
             <UniformCard key={uniform.id} uniform={uniform} />
           ))}
+        </div>
+
+        <div className="flex justify-center gap-4 mt-6">
+          <Button
+            variant="outline"
+            onClick={pagination.previousPage}
+            disabled={pagination.currentPage === 0}
+          >
+            Anterior
+          </Button>
+          <Button
+            variant="outline"
+            onClick={pagination.nextPage}
+            disabled={!pagination.hasMore}
+          >
+            Próximo
+          </Button>
         </div>
       </div>
     </ScrollArea>

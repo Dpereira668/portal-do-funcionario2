@@ -9,34 +9,32 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { Plus, FileText, Download, Trash2 } from "lucide-react";
-
-interface Document {
-  id: string;
-  title: string;
-  description: string | null;
-  document_type: string;
-  file_url: string;
-  created_at: string;
-  employee_id: string | null;
-  created_by: string;
-}
+import { usePagination } from "@/hooks/usePagination";
 
 const DocumentosIndex = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const pagination = usePagination({ pageSize: 9 });
 
   const { data: documents, isLoading } = useQuery({
-    queryKey: ['documents'],
+    queryKey: ['documents', pagination.currentPage],
     queryFn: async () => {
+      const { start, end } = pagination.getRange();
       const { data, error } = await supabase
         .from('documents')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(start, end);
 
       if (error) throw error;
-      return data as Document[];
+      
+      if (data) {
+        pagination.updateHasMore(data.length);
+      }
+      
+      return data;
     }
   });
 
@@ -236,6 +234,23 @@ const DocumentosIndex = () => {
               </CardContent>
             </Card>
           ))}
+        </div>
+
+        <div className="flex justify-center gap-4 mt-6">
+          <Button
+            variant="outline"
+            onClick={pagination.previousPage}
+            disabled={pagination.currentPage === 0}
+          >
+            Anterior
+          </Button>
+          <Button
+            variant="outline"
+            onClick={pagination.nextPage}
+            disabled={!pagination.hasMore}
+          >
+            Próximo
+          </Button>
         </div>
       </div>
     </ScrollArea>
