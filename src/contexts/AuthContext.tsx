@@ -23,20 +23,70 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const ensureProfile = async (user: User) => {
+    console.log("Verificando existência do perfil para:", user.id);
+    
+    const { data: profile, error: fetchError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+
+    if (fetchError && fetchError.code !== 'PGRST116') {
+      console.error("Erro ao verificar perfil:", fetchError);
+      return;
+    }
+
+    if (!profile) {
+      console.log("Perfil não encontrado, criando novo perfil...");
+      const { error: insertError } = await supabase
+        .from('profiles')
+        .insert([{
+          id: user.id,
+          email: user.email,
+          role: 'funcionario',
+          user_type: 'funcionario'
+        }]);
+
+      if (insertError) {
+        console.error("Erro ao criar perfil:", insertError);
+        toast({
+          title: "Erro ao criar perfil",
+          description: "Não foi possível criar seu perfil. Por favor, tente novamente.",
+          variant: "destructive",
+        });
+      } else {
+        console.log("Perfil criado com sucesso");
+        toast({
+          title: "Perfil criado",
+          description: "Seu perfil foi criado com sucesso!",
+        });
+      }
+    } else {
+      console.log("Perfil existente encontrado:", profile);
+    }
+  };
+
   useEffect(() => {
     // Fetch initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log("Initial session fetch:", session);
       setSession(session);
       setUser(session?.user ?? null);
+      if (session?.user) {
+        ensureProfile(session.user);
+      }
       setLoading(false);
     });
 
     // Set up auth state change listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       console.log("Auth state changed:", session);
       setSession(session);
       setUser(session?.user ?? null);
+      if (session?.user) {
+        await ensureProfile(session.user);
+      }
       setLoading(false);
     });
 
