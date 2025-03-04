@@ -1,6 +1,7 @@
 
 import { supabase } from "@/lib/supabase";
 import { Uniform } from "@/pages/dashboard/admin/uniformes/types";
+import { logUserAction } from "./auditLogService";
 import { useToast } from "@/hooks/use-toast";
 
 export async function getUniforms(page = 0, pageSize = 10) {
@@ -26,7 +27,7 @@ export async function getUniforms(page = 0, pageSize = 10) {
   };
 }
 
-export async function addUniform(uniformData: Omit<Uniform, "id" | "created_at" | "updated_at">) {
+export async function addUniform(uniformData: Omit<Uniform, "id" | "created_at" | "updated_at">, userId: string) {
   console.log("Adicionando uniform ao Supabase:", uniformData);
   const { data, error } = await supabase
     .from('uniforms')
@@ -38,11 +39,34 @@ export async function addUniform(uniformData: Omit<Uniform, "id" | "created_at" 
     throw error;
   }
   
+  // Log the action
+  if (data && data.length > 0) {
+    await logUserAction({
+      user_id: userId,
+      action: 'create',
+      resource_type: 'uniform',
+      resource_id: data[0].id,
+      details: { ...uniformData }
+    });
+  }
+  
   return data;
 }
 
-export async function updateUniform(id: string, uniformData: Partial<Uniform>) {
+export async function updateUniform(id: string, uniformData: Partial<Uniform>, userId: string) {
   console.log(`Atualizando uniform ${id}:`, uniformData);
+  
+  // Get the old data first for logging purposes
+  const { data: oldData, error: fetchError } = await supabase
+    .from('uniforms')
+    .select('*')
+    .eq('id', id)
+    .single();
+    
+  if (fetchError) {
+    console.error(`Erro ao buscar dados antigos do uniform ${id}:`, fetchError);
+  }
+  
   const { data, error } = await supabase
     .from('uniforms')
     .update(uniformData)
@@ -54,11 +78,37 @@ export async function updateUniform(id: string, uniformData: Partial<Uniform>) {
     throw error;
   }
   
+  // Log the action with both old and new data for comparison
+  if (data && data.length > 0) {
+    await logUserAction({
+      user_id: userId,
+      action: 'update',
+      resource_type: 'uniform',
+      resource_id: id,
+      details: { 
+        previous: oldData,
+        updated: uniformData
+      }
+    });
+  }
+  
   return data;
 }
 
-export async function deleteUniform(id: string) {
+export async function deleteUniform(id: string, userId: string) {
   console.log(`Excluindo uniform ${id}`);
+  
+  // Get the data first for logging purposes
+  const { data: oldData, error: fetchError } = await supabase
+    .from('uniforms')
+    .select('*')
+    .eq('id', id)
+    .single();
+    
+  if (fetchError) {
+    console.error(`Erro ao buscar dados do uniform ${id} antes da exclusão:`, fetchError);
+  }
+  
   const { error } = await supabase
     .from('uniforms')
     .delete()
@@ -68,6 +118,15 @@ export async function deleteUniform(id: string) {
     console.error("Erro ao excluir uniform:", error);
     throw error;
   }
+  
+  // Log the action
+  await logUserAction({
+    user_id: userId,
+    action: 'delete',
+    resource_type: 'uniform',
+    resource_id: id,
+    details: { deleted_data: oldData }
+  });
   
   return true;
 }

@@ -1,5 +1,6 @@
 
 import { supabase } from "@/lib/supabase";
+import { logUserAction } from "./auditLogService";
 
 interface UniformRequestItem {
   tipoUniforme: string;
@@ -61,6 +62,22 @@ export async function createUniformRequests(
     throw error;
   }
   
+  // Log each request creation
+  for (const item of uniformItems) {
+    await logUserAction({
+      user_id: userId,
+      action: 'create',
+      resource_type: 'uniform_request',
+      details: {
+        type: 'uniforme',
+        uniform_type: item.tipoUniforme,
+        uniform_size: item.tamanhoUniforme,
+        uniform_quantity: item.quantidade,
+        notes
+      }
+    });
+  }
+  
   return data;
 }
 
@@ -75,6 +92,15 @@ export async function createRequest(requestData: RequestData) {
     console.error("Erro ao criar solicitação:", error);
     throw error;
   }
+  
+  // Log the request creation
+  await logUserAction({
+    user_id: requestData.user_id,
+    action: 'create',
+    resource_type: 'request',
+    resource_id: data ? data[0]?.id : undefined,
+    details: { ...requestData }
+  });
   
   return data;
 }
@@ -94,8 +120,20 @@ export async function getAllRequests() {
   return data;
 }
 
-export async function updateRequestStatus(id: string, status: string) {
+export async function updateRequestStatus(id: string, status: string, userId: string) {
   console.log(`Atualizando status da solicitação ${id} para ${status}`);
+  
+  // Get the original request for logging
+  const { data: originalRequest, error: fetchError } = await supabase
+    .from('requests')
+    .select('*')
+    .eq('id', id)
+    .single();
+    
+  if (fetchError) {
+    console.error("Erro ao buscar solicitação original:", fetchError);
+  }
+  
   const { data, error } = await supabase
     .from('requests')
     .update({ status })
@@ -105,6 +143,18 @@ export async function updateRequestStatus(id: string, status: string) {
     console.error("Erro ao atualizar status da solicitação:", error);
     throw error;
   }
+  
+  // Log the status update
+  await logUserAction({
+    user_id: userId,
+    action: 'update_status',
+    resource_type: 'request',
+    resource_id: id,
+    details: { 
+      previous_status: originalRequest?.status,
+      new_status: status
+    }
+  });
   
   return data;
 }
