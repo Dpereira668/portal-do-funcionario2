@@ -38,9 +38,10 @@ export const AddUniformForm = ({ onSuccess }: AddUniformFormProps) => {
       onSuccess();
       queryClient.invalidateQueries({ queryKey: ['uniforms'] });
     } catch (error: any) {
+      console.error('Erro ao adicionar uniforme:', error);
       toast({
         title: "Erro ao adicionar uniforme",
-        description: error.message,
+        description: error.message || "Ocorreu um erro ao adicionar o uniforme. Tente novamente.",
         variant: "destructive",
       });
     }

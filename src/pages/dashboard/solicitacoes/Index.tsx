@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   Table,
@@ -76,15 +75,24 @@ const SolicitacoesIndex = () => {
     const solicitacao = solicitacoes.find(s => s.id === id);
     if (!solicitacao) return;
 
-    const message = action === 'aprovar' 
-      ? `Solicitação de ${solicitacao.tipo.toLowerCase()} aprovada para ${solicitacao.funcionario}`
-      : `Solicitação de ${solicitacao.tipo.toLowerCase()} rejeitada para ${solicitacao.funcionario}`;
+    try {
+      const message = action === 'aprovar' 
+        ? `Solicitação de ${solicitacao.tipo.toLowerCase()} aprovada para ${solicitacao.funcionario}`
+        : `Solicitação de ${solicitacao.tipo.toLowerCase()} rejeitada para ${solicitacao.funcionario}`;
 
-    toast({
-      title: `${action === 'aprovar' ? 'Aprovação' : 'Rejeição'} de solicitação`,
-      description: message,
-      variant: action === 'aprovar' ? 'default' : 'destructive',
-    });
+      toast({
+        title: `${action === 'aprovar' ? 'Aprovação' : 'Rejeição'} de solicitação`,
+        description: message,
+        variant: action === 'aprovar' ? 'default' : 'destructive',
+      });
+    } catch (error: any) {
+      console.error(`Erro ao ${action} solicitação:`, error);
+      toast({
+        title: `Erro ao ${action} solicitação`,
+        description: error.message || `Ocorreu um erro ao ${action} a solicitação. Tente novamente.`,
+        variant: "destructive",
+      });
+    }
   };
 
   return (

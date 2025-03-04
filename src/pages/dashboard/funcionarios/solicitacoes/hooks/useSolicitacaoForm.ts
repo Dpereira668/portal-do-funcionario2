@@ -110,6 +110,10 @@ export const useSolicitacaoForm = ({ onSuccess, tipoInicial }: UseSolicitacaoFor
         }
 
         console.log("Solicitações de uniforme processadas com sucesso:", results);
+        toast({
+          title: "Solicitação enviada",
+          description: `Sua solicitação de ${novaSolicitacao.uniformeItens.length} item(ns) de uniforme foi enviada com sucesso!`,
+        });
       } else {
         // Validar campos específicos para cada tipo de solicitação
         if (novaSolicitacao.tipo === 'adiantamento' && !novaSolicitacao.advance_reason) {
@@ -143,12 +147,26 @@ export const useSolicitacaoForm = ({ onSuccess, tipoInicial }: UseSolicitacaoFor
         }
 
         console.log("Solicitação processada com sucesso:", data);
+        
+        // Mensagem específica por tipo de solicitação
+        let descricao = "Sua solicitação foi enviada com sucesso!";
+        switch (novaSolicitacao.tipo) {
+          case 'ferias':
+            descricao = `Solicitação de férias para ${novaSolicitacao.dataInicio} enviada com sucesso!`;
+            break;
+          case 'adiantamento':
+            descricao = `Solicitação de adiantamento de R$ ${novaSolicitacao.advance_amount} enviada com sucesso!`;
+            break;
+          case 'documento':
+            descricao = `Solicitação de documento enviada com sucesso!`;
+            break;
+        }
+        
+        toast({
+          title: "Solicitação enviada",
+          description: descricao,
+        });
       }
-
-      toast({
-        title: "Solicitação enviada",
-        description: "Sua solicitação foi enviada com sucesso!",
-      });
 
       resetForm();
       queryClient.invalidateQueries({ queryKey: ['solicitacoes'] });
@@ -173,4 +191,3 @@ export const useSolicitacaoForm = ({ onSuccess, tipoInicial }: UseSolicitacaoFor
     handleSubmit,
   };
 };
-

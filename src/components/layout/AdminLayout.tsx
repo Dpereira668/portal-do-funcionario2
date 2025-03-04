@@ -1,4 +1,3 @@
-
 import {
   Sidebar,
   SidebarContent,
@@ -30,6 +29,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "../ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { Toaster } from "@/components/ui/toaster";
 
 const AdminLayout = () => {
   const isMobile = useIsMobile();
@@ -155,6 +155,7 @@ const AdminLayout = () => {
         <main className="flex-1 overflow-hidden bg-background">
           <Outlet />
         </main>
+        <Toaster />
       </div>
     </SidebarProvider>
   );

@@ -1,4 +1,3 @@
-
 import { Outlet } from "react-router-dom";
 import { Home, User } from "lucide-react";
 import { Button } from "../ui/button";
@@ -8,6 +7,7 @@ import { SidebarNav, SidebarNavItem } from "../ui/SidebarNav";
 import { EmployeeProfileForm } from "../funcionario/EmployeeProfileForm";
 import { ScrollArea } from "../ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Toaster } from "@/components/ui/toaster";
 
 const SidebarContent = () => {
   return (
@@ -59,10 +59,10 @@ const FuncionarioLayout = () => {
             </div>
           </ScrollArea>
         </main>
+        <Toaster />
       </div>
     </SidebarProvider>
   );
 };
 
 export default FuncionarioLayout;
-
