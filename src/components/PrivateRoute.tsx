@@ -2,15 +2,21 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 
 const LoadingSpinner = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+  <div className="min-h-screen flex flex-col items-center justify-center">
+    <Loader2 className="h-10 w-10 animate-spin text-primary" />
+    <p className="mt-4 text-muted-foreground">Carregando...</p>
   </div>
 );
 
-const PrivateRoute = () => {
-  const { user, loading: authLoading } = useAuth();
+interface PrivateRouteProps {
+  requiredRole?: string;
+}
+
+const PrivateRoute = ({ requiredRole }: PrivateRouteProps = {}) => {
+  const { user, loading: authLoading, checkPermission } = useAuth();
   const location = useLocation();
   const { toast } = useToast();
 
@@ -22,7 +28,23 @@ const PrivateRoute = () => {
   // Handle unauthenticated users
   if (!user) {
     console.log("Redirecting to login - no user");
+    toast({
+      title: "Acesso restrito",
+      description: "Você precisa estar logado para acessar esta página.",
+      variant: "destructive",
+    });
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+  }
+
+  // Check for role-based permissions if required
+  if (requiredRole && !checkPermission(requiredRole)) {
+    console.log(`User doesn't have required role: ${requiredRole}`);
+    toast({
+      title: "Acesso negado",
+      description: "Você não tem permissão para acessar esta página.",
+      variant: "destructive",
+    });
+    return <Navigate to="/admin/solicitacoes" replace />;
   }
 
   // Handle root path

@@ -14,13 +14,14 @@ import { Link, Navigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
+import { Loader2 } from "lucide-react";
 
 const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const { signUp, user } = useAuth();
+  const [submitting, setSubmitting] = useState(false);
+  const { signUp, user, loading: authLoading } = useAuth();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent, isAdmin: boolean) => {
@@ -43,7 +44,7 @@ const Register = () => {
       return;
     }
 
-    setLoading(true);
+    setSubmitting(true);
     try {
       await signUp(email, password, isAdmin);
       toast({
@@ -52,18 +53,25 @@ const Register = () => {
       });
     } catch (error: any) {
       console.error("Registration error:", error);
-      toast({
-        title: "Erro no cadastro",
-        description: "Não foi possível criar sua conta. Tente novamente.",
-        variant: "destructive",
-      });
+      // Error is already handled in the signUp function
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
   if (user) {
     return <Navigate to="/admin/solicitacoes" replace />;
+  }
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5 flex items-center justify-center p-4">
+        <div className="flex flex-col items-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="mt-4 text-muted-foreground">Verificando autenticação...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -93,6 +101,7 @@ const Register = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    disabled={submitting}
                   />
                 </div>
                 <div className="space-y-2">
@@ -103,15 +112,19 @@ const Register = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    disabled={submitting}
                   />
                 </div>
                 <Button
                   type="submit"
                   className="w-full"
-                  disabled={loading}
+                  disabled={submitting}
                 >
-                  {loading ? (
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
+                  {submitting ? (
+                    <div className="flex items-center">
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <span>Cadastrando...</span>
+                    </div>
                   ) : (
                     "Cadastrar como Funcionário"
                   )}
@@ -130,6 +143,7 @@ const Register = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    disabled={submitting}
                   />
                 </div>
                 <div className="space-y-2">
@@ -140,6 +154,7 @@ const Register = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    disabled={submitting}
                   />
                 </div>
                 <div className="space-y-2">
@@ -151,15 +166,19 @@ const Register = () => {
                     onChange={(e) => setAdminPassword(e.target.value)}
                     required
                     placeholder="Digite a senha administrativa"
+                    disabled={submitting}
                   />
                 </div>
                 <Button
                   type="submit"
                   className="w-full"
-                  disabled={loading}
+                  disabled={submitting}
                 >
-                  {loading ? (
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
+                  {submitting ? (
+                    <div className="flex items-center">
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <span>Cadastrando...</span>
+                    </div>
                   ) : (
                     "Cadastrar como Administrador"
                   )}

@@ -9,34 +9,38 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const { signIn, user } = useAuth();
+  const [submitting, setSubmitting] = useState(false);
+  const { signIn, user, loading: authLoading } = useAuth();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) return;
+    if (!email || !password) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Por favor, preencha todos os campos.",
+        variant: "destructive",
+      });
+      return;
+    }
     
-    setLoading(true);
+    setSubmitting(true);
     try {
       await signIn(email, password);
       console.log("Login successful");
     } catch (error: any) {
       console.error("Login error:", error);
-      toast({
-        title: "Erro no login",
-        description: "Verifique suas credenciais e tente novamente",
-        variant: "destructive",
-      });
+      // Error is already handled in the signIn function
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
@@ -56,44 +60,64 @@ const Login = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium" htmlFor="email">
-                Email
-              </label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="seu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+          {authLoading ? (
+            <div className="flex justify-center items-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <span className="ml-2">Verificando autenticação...</span>
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium" htmlFor="password">
-                Senha
-              </label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={loading}
-            >
-              {loading ? (
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
-              ) : (
-                "Entrar"
-              )}
-            </Button>
-          </form>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium" htmlFor="email">
+                  Email
+                </label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="seu@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  disabled={submitting}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium" htmlFor="password">
+                  Senha
+                </label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  disabled={submitting}
+                />
+              </div>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={submitting}
+              >
+                {submitting ? (
+                  <div className="flex items-center">
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <span>Entrando...</span>
+                  </div>
+                ) : (
+                  "Entrar"
+                )}
+              </Button>
+              <div className="text-center">
+                <Link 
+                  to="/cadastro" 
+                  className="text-sm text-primary hover:underline"
+                >
+                  Não tem uma conta? Cadastre-se
+                </Link>
+              </div>
+            </form>
+          )}
         </CardContent>
       </Card>
     </div>

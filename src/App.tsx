@@ -46,14 +46,16 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* Rotas de Funcionário (Sem autenticação) */}
-          <Route path="/funcionario" element={<FuncionarioLayout />}>
-            <Route index element={<Navigate to="/funcionario/solicitacoes" replace />} />
-            <Route path="solicitacoes" element={<SolicitacoesDoFuncionario />} />
+          {/* Rotas de Funcionário (Com autenticação) */}
+          <Route element={<PrivateRoute />}>
+            <Route path="/funcionario" element={<FuncionarioLayout />}>
+              <Route index element={<Navigate to="/funcionario/solicitacoes" replace />} />
+              <Route path="solicitacoes" element={<SolicitacoesDoFuncionario />} />
+            </Route>
           </Route>
 
           {/* Rotas Protegidas (Admin) */}
-          <Route element={<PrivateRoute />}>
+          <Route element={<PrivateRoute requiredRole="admin" />}>
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<Navigate to="/admin/solicitacoes" replace />} />
               <Route path="solicitacoes" element={<SolicitacoesIndex />} />
