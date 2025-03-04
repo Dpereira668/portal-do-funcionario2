@@ -86,7 +86,8 @@ export async function createRequest(requestData: RequestData) {
   
   const { data, error } = await supabase
     .from('requests')
-    .insert([requestData]);
+    .insert([requestData])
+    .select(); // Add .select() to return the inserted data with IDs
 
   if (error) {
     console.error("Erro ao criar solicitação:", error);
@@ -98,7 +99,7 @@ export async function createRequest(requestData: RequestData) {
     user_id: requestData.user_id,
     action: 'create',
     resource_type: 'request',
-    resource_id: data ? data[0]?.id : undefined,
+    resource_id: data && data.length > 0 ? data[0].id : undefined,
     details: { ...requestData }
   });
   
