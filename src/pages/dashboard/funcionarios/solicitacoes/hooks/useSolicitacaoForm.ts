@@ -2,8 +2,8 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/lib/supabase";
-import { useQueryClient } from "@tanstack/react-query";
+import { useRequestStore } from "@/store/useRequestStore";
+import { validateRequest } from "@/validations/requestSchema";
 
 interface UniformItem {
   tipoUniforme: string;
@@ -19,8 +19,9 @@ interface UseSolicitacaoFormProps {
 export const useSolicitacaoForm = ({ onSuccess, tipoInicial }: UseSolicitacaoFormProps) => {
   const { toast } = useToast();
   const { user } = useAuth();
-  const queryClient = useQueryClient();
+  const { createUniformRequests, createRequest } = useRequestStore();
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [novaSolicitacao, setNovaSolicitacao] = useState({
     tipo: tipoInicial || "",
     dataInicio: "",
@@ -37,6 +38,15 @@ export const useSolicitacaoForm = ({ onSuccess, tipoInicial }: UseSolicitacaoFor
       ...prev,
       [field]: value,
     }));
+    
+    // Limpar erro do campo quando o usuário edita
+    if (errors[field]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
   };
 
   const resetForm = () => {
@@ -50,6 +60,7 @@ export const useSolicitacaoForm = ({ onSuccess, tipoInicial }: UseSolicitacaoFor
       advance_amount: 0,
       advance_reason: "",
     });
+    setErrors({});
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -75,6 +86,28 @@ export const useSolicitacaoForm = ({ onSuccess, tipoInicial }: UseSolicitacaoFor
       return;
     }
 
+    console.log("Validando solicitação:", {
+      tipo: novaSolicitacao.tipo,
+      dados: novaSolicitacao
+    });
+    
+    const { isValid, errors: validationErrors } = await validateRequest(
+      novaSolicitacao.tipo,
+      novaSolicitacao
+    );
+    
+    if (!isValid && validationErrors) {
+      console.error("Erros de validação:", validationErrors);
+      setErrors(validationErrors);
+      toast({
+        title: "Erro de validação",
+        description: "Verifique os dados do formulário e tente novamente.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setErrors({});
     console.log("Iniciando submissão de solicitação:", {
       tipo: novaSolicitacao.tipo,
       userId: user.id,
@@ -84,69 +117,29 @@ export const useSolicitacaoForm = ({ onSuccess, tipoInicial }: UseSolicitacaoFor
     setLoading(true);
     try {
       if (novaSolicitacao.tipo === 'uniforme') {
-        // Validar itens do uniforme
-        if (novaSolicitacao.uniformeItens.some(item => !item.tipoUniforme || !item.tamanhoUniforme)) {
-          throw new Error("Preencha todos os campos do uniforme");
-        }
-
-        console.log("Processando solicitação de uniforme:", novaSolicitacao.uniformeItens);
-        const promises = novaSolicitacao.uniformeItens.map(item => 
-          supabase.from('requests').insert({
-            user_id: user.id,
-            type: novaSolicitacao.tipo,
-            notes: novaSolicitacao.observacoes,
-            uniform_type: item.tipoUniforme,
-            uniform_size: item.tamanhoUniforme,
-            uniform_quantity: item.quantidade,
-          })
+        await createUniformRequests(
+          user.id,
+          novaSolicitacao.uniformeItens,
+          novaSolicitacao.observacoes
         );
-
-        const results = await Promise.all(promises);
-        const errors = results.filter(result => result.error);
-
-        if (errors.length > 0) {
-          console.error("Erros ao processar solicitações de uniforme:", errors);
-          throw errors[0].error;
-        }
-
-        console.log("Solicitações de uniforme processadas com sucesso:", results);
+        
         toast({
           title: "Solicitação enviada",
           description: `Sua solicitação de ${novaSolicitacao.uniformeItens.length} item(ns) de uniforme foi enviada com sucesso!`,
         });
       } else {
-        // Validar campos específicos para cada tipo de solicitação
-        if (novaSolicitacao.tipo === 'adiantamento' && !novaSolicitacao.advance_reason) {
-          console.error("Tentativa de solicitar adiantamento sem motivo");
-          throw new Error("Informe o motivo do adiantamento");
-        }
-
-        if ((novaSolicitacao.tipo === 'ferias' || novaSolicitacao.tipo === 'documento') && !novaSolicitacao.dataInicio) {
-          console.error("Tentativa de solicitar férias/documento sem data de início");
-          throw new Error("Selecione a data de início");
-        }
-
-        console.log("Processando solicitação genérica:", {
-          tipo: novaSolicitacao.tipo,
-          dados: novaSolicitacao
-        });
-
-        const { data, error } = await supabase.from('requests').insert({
+        // Criar objeto de solicitação baseado no tipo
+        const requestData = {
           user_id: user.id,
           type: novaSolicitacao.tipo,
-          start_date: novaSolicitacao.dataInicio,
-          end_date: novaSolicitacao.dataFim || null,
           notes: novaSolicitacao.observacoes,
-          advance_amount: novaSolicitacao.tipo === 'adiantamento' ? novaSolicitacao.advance_amount : null,
-          advance_reason: novaSolicitacao.tipo === 'adiantamento' ? novaSolicitacao.advance_reason : null,
-        });
-
-        if (error) {
-          console.error("Erro ao processar solicitação:", error);
-          throw error;
-        }
-
-        console.log("Solicitação processada com sucesso:", data);
+          start_date: novaSolicitacao.dataInicio,
+          end_date: novaSolicitacao.tipo === 'ferias' ? novaSolicitacao.dataFim : undefined,
+          advance_amount: novaSolicitacao.tipo === 'adiantamento' ? novaSolicitacao.advance_amount : undefined,
+          advance_reason: novaSolicitacao.tipo === 'adiantamento' ? novaSolicitacao.advance_reason : undefined,
+        };
+        
+        await createRequest(requestData);
         
         // Mensagem específica por tipo de solicitação
         let descricao = "Sua solicitação foi enviada com sucesso!";
@@ -169,7 +162,6 @@ export const useSolicitacaoForm = ({ onSuccess, tipoInicial }: UseSolicitacaoFor
       }
 
       resetForm();
-      queryClient.invalidateQueries({ queryKey: ['solicitacoes'] });
       onSuccess();
     } catch (error: any) {
       console.error("Erro fatal ao processar solicitação:", error);
@@ -187,6 +179,7 @@ export const useSolicitacaoForm = ({ onSuccess, tipoInicial }: UseSolicitacaoFor
   return {
     novaSolicitacao,
     loading,
+    errors,
     handleChange,
     handleSubmit,
   };

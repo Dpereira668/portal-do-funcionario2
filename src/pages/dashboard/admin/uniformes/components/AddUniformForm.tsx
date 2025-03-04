@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+import { useState } from "react";
+import { useUniformStore } from "@/store/useUniformStore";
+import { validateUniform } from "@/validations/uniformSchema";
 
 interface AddUniformFormProps {
   onSuccess: () => void;
@@ -12,31 +13,45 @@ interface AddUniformFormProps {
 
 export const AddUniformForm = ({ onSuccess }: AddUniformFormProps) => {
   const { toast } = useToast();
-  const queryClient = useQueryClient();
+  const addUniform = useUniformStore(state => state.addUniform);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleAddUniform = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     
+    const uniformData = {
+      type: formData.get('type') as string,
+      size: formData.get('size') as string,
+      quantity: parseInt(formData.get('quantity') as string, 10),
+      min_quantity: parseInt(formData.get('min_quantity') as string, 10),
+    };
+    
+    console.log("Validando dados do uniforme:", uniformData);
+    const { isValid, errors: validationErrors } = await validateUniform(uniformData);
+    
+    if (!isValid && validationErrors) {
+      console.error("Erros de validação:", validationErrors);
+      setErrors(validationErrors);
+      toast({
+        title: "Erro de validação",
+        description: "Verifique os dados do formulário e tente novamente.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setErrors({});
+    
     try {
-      const { error } = await supabase
-        .from('uniforms')
-        .insert({
-          type: formData.get('type'),
-          size: formData.get('size'),
-          quantity: parseInt(formData.get('quantity') as string, 10),
-          min_quantity: parseInt(formData.get('min_quantity') as string, 10),
-        });
-
-      if (error) throw error;
-
+      await addUniform(uniformData);
+      
       toast({
         title: "Uniforme adicionado",
         description: "O uniforme foi adicionado com sucesso.",
       });
 
       onSuccess();
-      queryClient.invalidateQueries({ queryKey: ['uniforms'] });
     } catch (error: any) {
       console.error('Erro ao adicionar uniforme:', error);
       toast({
@@ -56,6 +71,7 @@ export const AddUniformForm = ({ onSuccess }: AddUniformFormProps) => {
         <div className="space-y-2">
           <label className="text-sm font-medium">Tipo</label>
           <Input name="type" required />
+          {errors.type && <p className="text-sm text-red-500">{errors.type}</p>}
         </div>
         <div className="space-y-2">
           <label className="text-sm font-medium">Tamanho</label>
@@ -72,6 +88,7 @@ export const AddUniformForm = ({ onSuccess }: AddUniformFormProps) => {
             <option value="GG">GG</option>
             <option value="XG">XG</option>
           </select>
+          {errors.size && <p className="text-sm text-red-500">{errors.size}</p>}
         </div>
         <div className="space-y-2">
           <label className="text-sm font-medium">Quantidade</label>
@@ -82,6 +99,7 @@ export const AddUniformForm = ({ onSuccess }: AddUniformFormProps) => {
             defaultValue="0" 
             required 
           />
+          {errors.quantity && <p className="text-sm text-red-500">{errors.quantity}</p>}
         </div>
         <div className="space-y-2">
           <label className="text-sm font-medium">Quantidade Mínima</label>
@@ -92,6 +110,7 @@ export const AddUniformForm = ({ onSuccess }: AddUniformFormProps) => {
             defaultValue="0" 
             required 
           />
+          {errors.min_quantity && <p className="text-sm text-red-500">{errors.min_quantity}</p>}
         </div>
         <Button type="submit" className="w-full">
           Adicionar
