@@ -28,9 +28,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { AccessibilityAssistant } from "./components/AccessibilityAssistant";
 import withErrorBoundary from "./components/ErrorBoundary";
 
-// Create a custom Sentry-monitored router
-const SentryRoutes = Sentry.withRouterRouting(Routes);
-
+// Create a query client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -46,7 +44,7 @@ const App = () => (
       <QueryClientProvider client={queryClient}>
         <Toaster />
         <AccessibilityAssistant />
-        <SentryRoutes>
+        <Routes>
           {/* Rotas Públicas */}
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
@@ -82,7 +80,7 @@ const App = () => (
 
           {/* Página 404 */}
           <Route path="*" element={<NotFound />} />
-        </SentryRoutes>
+        </Routes>
       </QueryClientProvider>
     </AuthProvider>
   </BrowserRouter>

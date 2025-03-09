@@ -37,7 +37,7 @@ const ErrorFallback: React.FC<FallbackProps> = ({ error, resetError }) => {
 // Higher Order Component for Sentry Error Boundary
 export const withErrorBoundary = <P extends object>(
   Component: React.ComponentType<P>,
-  options?: Sentry.ErrorBoundaryOptions
+  options?: Sentry.ErrorBoundaryProps
 ) => {
   return (props: P) => (
     <Sentry.ErrorBoundary
