@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth";
 import { Navigate } from "react-router-dom";
 import { GoogleLoginButton } from "@/components/auth/GoogleLoginButton";
 import { EmailLoginForm } from "@/components/auth/EmailLoginForm";

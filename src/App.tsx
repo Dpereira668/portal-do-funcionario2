@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
@@ -24,11 +23,10 @@ import SolicitacoesDoFuncionario from "./pages/dashboard/funcionarios/solicitaco
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import PrivateRoute from "./components/PrivateRoute";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthProvider } from "./contexts/auth";
 import { AccessibilityAssistant } from "./components/AccessibilityAssistant";
 import withErrorBoundary from "./components/ErrorBoundary";
 
-// Create a query client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -45,12 +43,10 @@ const App = () => (
         <Toaster />
         <AccessibilityAssistant />
         <Routes>
-          {/* Rotas Públicas */}
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* Rotas de Funcionário (Com autenticação) */}
           <Route element={<PrivateRoute />}>
             <Route path="/funcionario" element={<FuncionarioLayout />}>
               <Route index element={<Navigate to="/funcionario/solicitacoes" replace />} />
@@ -58,7 +54,6 @@ const App = () => (
             </Route>
           </Route>
 
-          {/* Rotas Protegidas (Admin) */}
           <Route element={<PrivateRoute requiredRole="admin" />}>
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<Navigate to="/admin/solicitacoes" replace />} />
@@ -78,7 +73,6 @@ const App = () => (
             </Route>
           </Route>
 
-          {/* Página 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </QueryClientProvider>
@@ -86,5 +80,4 @@ const App = () => (
   </BrowserRouter>
 );
 
-// Wrap the entire app with the Sentry error boundary
 export default withErrorBoundary(App);
