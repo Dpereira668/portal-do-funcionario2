@@ -2,6 +2,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import * as Sentry from "@sentry/react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import AdminLayout from "./components/layout/AdminLayout";
@@ -25,6 +26,10 @@ import Register from "./pages/auth/Register";
 import PrivateRoute from "./components/PrivateRoute";
 import { AuthProvider } from "./contexts/AuthContext";
 import { AccessibilityAssistant } from "./components/AccessibilityAssistant";
+import withErrorBoundary from "./components/ErrorBoundary";
+
+// Create a custom Sentry-monitored router
+const SentryRoutes = Sentry.withRouterRouting(Routes);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -41,7 +46,7 @@ const App = () => (
       <QueryClientProvider client={queryClient}>
         <Toaster />
         <AccessibilityAssistant />
-        <Routes>
+        <SentryRoutes>
           {/* Rotas Públicas */}
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
@@ -77,10 +82,11 @@ const App = () => (
 
           {/* Página 404 */}
           <Route path="*" element={<NotFound />} />
-        </Routes>
+        </SentryRoutes>
       </QueryClientProvider>
     </AuthProvider>
   </BrowserRouter>
 );
 
-export default App;
+// Wrap the entire app with the Sentry error boundary
+export default withErrorBoundary(App);

@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import * as Sentry from '@sentry/react';
 
 export function useAuthCheck() {
   const { user, loading } = useAuth();
@@ -11,6 +12,17 @@ export function useAuthCheck() {
     if (!loading) {
       setIsAuthenticated(!!user);
       setIsLoading(false);
+      
+      // Set user identity in Sentry when authenticated
+      if (user) {
+        Sentry.setUser({
+          id: user.id,
+          email: user.email,
+        });
+      } else {
+        // Clear user data when not authenticated
+        Sentry.setUser(null);
+      }
     }
   }, [user, loading]);
 

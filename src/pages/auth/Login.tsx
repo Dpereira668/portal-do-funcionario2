@@ -13,6 +13,7 @@ import { useState, useEffect } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import * as Sentry from '@sentry/react';
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -36,8 +37,23 @@ const Login = () => {
     try {
       await signIn(email, password);
       console.log("Login successful");
+      // Add breadcrumb for successful login
+      Sentry.addBreadcrumb({
+        category: 'auth',
+        message: 'Login successful',
+        level: 'info',
+      });
     } catch (error: any) {
       console.error("Login error:", error);
+      // Capture login failure
+      Sentry.captureException(error, {
+        tags: {
+          action: 'login',
+        },
+        extra: {
+          email: email,
+        },
+      });
       // Error is already handled in the signIn function
     } finally {
       setSubmitting(false);
