@@ -1,4 +1,5 @@
-import { Outlet } from "react-router-dom";
+
+import { Outlet, useNavigate } from "react-router-dom";
 import { Home, User } from "lucide-react";
 import { Button } from "../ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
@@ -8,12 +9,17 @@ import { EmployeeProfileForm } from "../funcionario/EmployeeProfileForm";
 import { ScrollArea } from "../ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Toaster } from "@/components/ui/toaster";
+import { useEffect } from "react";
+import * as Sentry from '@sentry/react';
 
 const SidebarContent = () => {
   return (
     <SidebarNav>
       <SidebarNavItem href="/" icon={Home}>
         Página Inicial
+      </SidebarNavItem>
+      <SidebarNavItem href="/funcionario/solicitacoes" icon={Home}>
+        Solicitações
       </SidebarNavItem>
       <SidebarNavItem href="/funcionario/perfil" icon={User}>
         Meu Perfil
@@ -24,6 +30,21 @@ const SidebarContent = () => {
 
 const FuncionarioLayout = () => {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    // Add breadcrumb for entering funcionario layout
+    Sentry.addBreadcrumb({
+      category: 'navigation',
+      message: 'Entered funcionario layout',
+      level: 'info'
+    });
+    
+    // Make sure the user is directed to a specific page
+    if (window.location.pathname === '/funcionario') {
+      navigate('/funcionario/solicitacoes');
+    }
+  }, [navigate]);
 
   return (
     <SidebarProvider>

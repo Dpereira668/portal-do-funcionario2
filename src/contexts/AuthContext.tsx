@@ -1,9 +1,9 @@
-
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Session, User, AuthError } from "@supabase/supabase-js";
+import * as Sentry from '@sentry/react';
 
 interface AuthContextType {
   user: User | null;
@@ -56,6 +56,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         if (insertError) {
           console.error("Erro ao criar perfil:", insertError);
+          
+          Sentry.captureException(insertError, {
+            tags: {
+              action: 'create_profile'
+            },
+            extra: {
+              userId: user.id
+            }
+          });
+          
           toast({
             title: "Erro ao criar perfil",
             description: "Não foi possível criar seu perfil. Por favor, tente novamente.",
@@ -63,12 +73,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           });
         } else {
           console.log("Perfil criado com sucesso");
+          
+          Sentry.addBreadcrumb({
+            category: 'profile',
+            message: 'Profile created successfully',
+            level: 'info'
+          });
+          
           toast({
             title: "Perfil criado",
             description: "Seu perfil foi criado com sucesso!",
           });
           
-          // Fetch the newly created profile
           const { data: newProfile } = await supabase
             .from('profiles')
             .select('*')
@@ -85,15 +101,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     } catch (error) {
       console.error("Erro ao processar perfil:", error);
+      Sentry.captureException(error, {
+        tags: {
+          action: 'process_profile'
+        }
+      });
     }
   };
 
-  // Check for active session on initial load
   useEffect(() => {
     const initializeAuth = async () => {
       setLoading(true);
       try {
-        // Check if there's an active session
         const { data: { session } } = await supabase.auth.getSession();
         console.log("Session check on app initialization:", session ? "Active session found" : "No active session");
         
@@ -113,7 +132,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     initializeAuth();
   }, []);
 
-  // Listen for auth state changes
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       console.log("Auth state changed:", _event, session ? "Session exists" : "No session");
@@ -156,6 +174,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       variant: "destructive",
     });
 
+    Sentry.captureException(error, {
+      tags: {
+        auth_action: action
+      }
+    });
+
     throw error;
   };
 
@@ -168,6 +192,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
 
       if (error) throw error;
+
+      Sentry.setUser({
+        email: email
+      });
 
       toast({
         title: "Login realizado com sucesso",
@@ -214,11 +242,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       if (error) throw error;
       
-      // Clear user state
       setUser(null);
       setSession(null);
       setUserProfile(null);
       setIsAdmin(false);
+      
+      Sentry.setUser(null);
       
       toast({
         title: "Logout realizado com sucesso",
@@ -240,7 +269,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return isAdmin;
     }
     
-    // For other role checks
     return userProfile?.role === requiredRole || userProfile?.user_type === requiredRole;
   };
 

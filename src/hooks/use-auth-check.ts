@@ -10,7 +10,8 @@ export function useAuthCheck() {
 
   useEffect(() => {
     if (!loading) {
-      setIsAuthenticated(!!user);
+      const authenticated = !!user;
+      setIsAuthenticated(authenticated);
       setIsLoading(false);
       
       // Set user identity in Sentry when authenticated

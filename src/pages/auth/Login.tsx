@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
@@ -36,8 +36,16 @@ const Login = () => {
     
     setSubmitting(true);
     try {
+      Sentry.addBreadcrumb({
+        category: 'auth',
+        message: 'Login attempt',
+        level: 'info',
+      });
+      
       await signIn(email, password);
+      
       console.log("Login successful");
+      
       Sentry.addBreadcrumb({
         category: 'auth',
         message: 'Login successful',
@@ -45,6 +53,7 @@ const Login = () => {
       });
     } catch (error: any) {
       console.error("Login error:", error);
+      
       Sentry.captureException(error, {
         tags: {
           action: 'login',
@@ -71,7 +80,7 @@ const Login = () => {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin + '/admin/solicitacoes'
+          redirectTo: window.location.origin + '/funcionario/solicitacoes'
         }
       });
       
@@ -112,8 +121,8 @@ const Login = () => {
   };
 
   if (user) {
-    console.log("User authenticated, redirecting to admin");
-    return <Navigate to="/admin/solicitacoes" replace />;
+    console.log("User authenticated, redirecting to funcionario");
+    return <Navigate to="/funcionario/solicitacoes" replace />;
   }
 
   return (
